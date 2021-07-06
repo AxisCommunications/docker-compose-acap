@@ -1,8 +1,8 @@
-# The Docker Engine ACAP 
+# The Docker Engine ACAP
 
 This is the ACAP packaging of the Docker Engine to be run on Axis devices with
 container support. Please note that this is ACAP4 alpha and not ready for production
-use. 
+use.
 
 ## Building (default architecture)
 
