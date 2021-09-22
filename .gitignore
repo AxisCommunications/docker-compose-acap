@@ -1,6 +1,10 @@
+build
 dockerd
+docker-compose
+docker-init
 docker-proxy
 dockerdwrapper
 package.conf.orig
 *.eap
 *.eap.old
+.clang-format
