@@ -36,11 +36,38 @@ Add **(+)** sign and browse to the newly built
 **Docker_Daemon_1_1_0_<arch>.eap** > Click **Install** > Run the application by
 enabling the **Start** switch.
 
-## Using the Docker ACAP
+## Using the Docker Compose ACAP
 
-The Docker ACAP does not contain the docker client binary. This means that all
-calls need to be done from a separate machine. This can be achieved by using
-the -H flag when running the docker command.
+The Docker Compose ACAP does contains the Docker Daemon, the docker client binary and the docker
+compose functionality. This means that all Docker management can be done running a terminal on
+the camera.
+
+### Using the Docker Compose ACAP on the camera
+
+The first step is to open a terminal on the camera. This can be done using SSH for example.
+
+```sh
+ssh root@<axis_device_ip>
+```
+
+The docker client binary will be reachable in the terminal without any additional setup:
+
+```sh
+docker version
+```
+
+The [docker compose](https://docs.docker.com/compose/cli-command) functionality is also available:
+
+```sh
+docker compose version
+```
+
+Note that the ACAP is shipped with [Compose V2](https://docs.docker.com/compose/cli-command).
+
+### Using the Docker Compose ACAP remotely
+
+It's also possible to call the Docker Compose ACAP from a separate machine.
+This can be achieved by using the -H flag when running the docker command on the remote machine.
 
 The port used will change depending on if the Docker ACAP runs using TLS or not.
 The Docker ACAP will be reachable on port 2375 when running unsecured, and on
@@ -52,6 +79,13 @@ the Docker ACAP in unsecured mode:
 
 ```sh
 docker -H=<axis_device_ip>:2375 version
+```
+
+The [docker compose](https://docs.docker.com/compose/cli-command) client can also run commands
+remotely on the camera:
+
+```sh
+docker -H=<axis_device_ip>:2375 compose ls
 ```
 
 See [Client keys and certificates](#client-keys-and-certificates) for an example
