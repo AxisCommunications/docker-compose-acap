@@ -1,6 +1,8 @@
-# The Docker Compose Engine ACAP
+# The Docker Compose ACAP
 
-This is the ACAP packaging of the Docker Engine to be run on Axis devices with container support.
+This ACAP contains both the Docker Engine and the binaries necessary to interact with it.
+Installing this ACAP will make it possible to run Docker containers and Docker commands directly
+on the Axis device.
 
 ## Building
 
