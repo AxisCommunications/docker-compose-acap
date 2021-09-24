@@ -1,6 +1,8 @@
-# The Docker Engine ACAP
+# The Docker Compose ACAP
 
-This is the ACAP packaging of the Docker Engine to be run on Axis devices with container support.
+This ACAP contains both the Docker Engine and the binaries necessary to interact with it.
+Installing this ACAP will make it possible to run Docker containers and Docker commands directly
+on the Axis device.
 
 ## Building
 
@@ -36,31 +38,58 @@ Add **(+)** sign and browse to the newly built
 **Docker_Daemon_1_1_0_<arch>.eap** > Click **Install** > Run the application by
 enabling the **Start** switch.
 
-## Using the Docker ACAP
+## Using the Docker Compose ACAP
 
-The Docker ACAP does not contain the docker client binary. This means that all
-calls need to be done from a separate machine. This can be achieved by using
-the -H flag when running the docker command.
+The Docker Compose ACAP does contains the Docker Daemon, the docker client binary and the docker
+compose functionality. This means that all Docker management can be done running a terminal on
+the camera.
 
-The port used will change depending on if the Docker ACAP runs using TLS or not.
-The Docker ACAP will be reachable on port 2375 when running unsecured, and on
+### Using the Docker Compose ACAP on the camera
+
+The first step is to open a terminal on the camera. This can be done using SSH:
+
+```sh
+ssh root@<axis_device_ip>
+```
+
+The docker client binary will be reachable in the terminal without any additional setup:
+
+```sh
+docker version
+```
+
+The [docker compose](https://docs.docker.com/compose/cli-command) functionality is also available:
+
+```sh
+docker compose version
+```
+
+Note that the ACAP is shipped with [Compose V2](https://docs.docker.com/compose/cli-command).
+
+### Using the Docker Compose ACAP remotely
+
+It's also possible to call the Docker Compose ACAP from a separate machine.
+This can be achieved by using the -H flag when running the docker command on the remote machine.
+
+The port used will change depending on if the Docker Compose ACAP runs using TLS or not.
+The Docker Compose ACAP will be reachable on port 2375 when running unsecured, and on
 port 2376 when running secured using TLS. Please read section
-[Securing the Docker ACAP using TLS](#securing-the-docker-acap-using-tls) for
+[Securing the Docker Compose ACAP using TLS](#securing-the-docker-acap-using-tls) for
 more information.
 Below is an example of how to remotely run a docker command on a camera running
-the Docker ACAP in unsecured mode:
+the Docker Compose ACAP in unsecured mode:
 
 ```sh
 docker -H=<axis_device_ip>:2375 version
 ```
 
 See [Client keys and certificates](#client-keys-and-certificates) for an example
-of how to remotely run docker commands on a camera running a secured Docker ACAP
+of how to remotely run docker commands on a camera running a secured Docker Compose ACAP
 using TLS.
 
-## Securing the Docker ACAP using TLS
+## Securing the Docker Compose ACAP using TLS
 
-The Docker ACAP can be run either unsecured or in TLS mode. The Docker ACAP uses
+The Docker Compose ACAP can be run either unsecured or in TLS mode. The Docker Compose ACAP uses
 TLS as default. Use the "Use TLS" dropdown in the web interface to switch
 between the two different modes. It's also possible to toggle this option by
 calling the parameter management API in [VAPIX](https://www.axis.com/vapix-library/)
@@ -119,7 +148,7 @@ docker --tlsverify \
 
 ## Using an SD card as storage
 
-An SD card might be necessary to run the Docker ACAP correctly. Docker
+An SD card might be necessary to run the Docker Compose ACAP correctly. Docker
 containers and docker images can be quite large, and putting them on an SD card
 gives more freedom in how many and how large images can be stored. Switching
 between storage on the SD card or internal storage is done by toggling the "SD
