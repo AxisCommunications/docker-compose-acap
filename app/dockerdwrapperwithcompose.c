@@ -56,12 +56,11 @@ static bool restart_dockerd = false;
 static void
 handle_signals(__attribute__((unused)) int signal_num)
 {
-  switch (signal_num)
-  {
-  case SIGINT:
-  case SIGTERM:
-  case SIGQUIT:
-    g_main_loop_quit(loop);
+  switch (signal_num) {
+    case SIGINT:
+    case SIGTERM:
+    case SIGQUIT:
+      g_main_loop_quit(loop);
   }
 }
 
@@ -92,13 +91,10 @@ is_process_alive(int pid)
 {
   int status;
   pid_t return_pid = waitpid(pid, &status, WNOHANG);
-  if (return_pid == -1)
-  {
+  if (return_pid == -1) {
     // Report errors as dead.
     return false;
-  }
-  else if (return_pid == dockerd_process_pid)
-  {
+  } else if (return_pid == dockerd_process_pid) {
     // Child is alread exited, so not alive.
     return false;
   }
@@ -114,18 +110,17 @@ static char *
 get_parameter_value(const char *parameter_name)
 {
   GError *error = NULL;
-  AXParameter *ax_parameter = ax_parameter_new("dockerdwrapperwithcompose", &error);
+  AXParameter *ax_parameter =
+      ax_parameter_new("dockerdwrapperwithcompose", &error);
   char *parameter_value = NULL;
 
-  if (ax_parameter == NULL)
-  {
+  if (ax_parameter == NULL) {
     syslog(LOG_ERR, "Error when creating axparameter: %s", error->message);
     goto end;
   }
 
   if (!ax_parameter_get(
-          ax_parameter, parameter_name, &parameter_value, &error))
-  {
+          ax_parameter, parameter_name, &parameter_value, &error)) {
     syslog(LOG_ERR,
            "Failed to fetch parameter value of %s. Error: %s",
            parameter_name,
@@ -136,8 +131,7 @@ get_parameter_value(const char *parameter_name)
   }
 
 end:
-  if (ax_parameter != NULL)
-  {
+  if (ax_parameter != NULL) {
     ax_parameter_free(ax_parameter);
   }
   g_clear_error(&error);
@@ -157,8 +151,7 @@ get_sd_filesystem(void)
   char buf[PATH_MAX];
   struct stat sd_card_stat;
   int stat_result = stat(sd_card_path, &sd_card_stat);
-  if (stat_result != 0)
-  {
+  if (stat_result != 0) {
     syslog(LOG_ERR,
            "Cannot store data on the SD card, no storage exists at %s",
            sd_card_path);
@@ -170,21 +163,17 @@ get_sd_filesystem(void)
 
   dev = sd_card_stat.st_dev;
 
-  if ((fp = setmntent("/proc/mounts", "r")) == NULL)
-  {
+  if ((fp = setmntent("/proc/mounts", "r")) == NULL) {
     return NULL;
   }
 
   struct mntent mnt;
-  while (getmntent_r(fp, &mnt, buf, PATH_MAX))
-  {
-    if (stat(mnt.mnt_dir, &sd_card_stat) != 0)
-    {
+  while (getmntent_r(fp, &mnt, buf, PATH_MAX)) {
+    if (stat(mnt.mnt_dir, &sd_card_stat) != 0) {
       continue;
     }
 
-    if (sd_card_stat.st_dev == dev)
-    {
+    if (sd_card_stat.st_dev == dev) {
       endmntent(fp);
       char *return_value = strdup(mnt.mnt_type);
       return return_value;
@@ -211,8 +200,7 @@ setup_sdcard(void)
   char *create_droot_command = g_strdup_printf("mkdir -p %s", data_root);
   char *create_eroot_command = g_strdup_printf("mkdir -p %s", exec_root);
   int res = system(create_droot_command);
-  if (res != 0)
-  {
+  if (res != 0) {
     syslog(LOG_ERR,
            "Failed to create data_root folder at: %s. Error code: %d",
            data_root,
@@ -220,8 +208,7 @@ setup_sdcard(void)
     goto end;
   }
   res = system(create_eroot_command);
-  if (res != 0)
-  {
+  if (res != 0) {
     syslog(LOG_ERR,
            "Failed to create exec_root folder at: %s. Error code: %d",
            exec_root,
@@ -255,19 +242,16 @@ start_dockerd(void)
   // Read parameters
   char *use_sd_card_value = get_parameter_value("SDCardSupport");
   char *use_tls_value = get_parameter_value("UseTLS");
-  if (use_sd_card_value == NULL || use_tls_value == NULL)
-  {
+  if (use_sd_card_value == NULL || use_tls_value == NULL) {
     goto end;
   }
   bool use_sdcard = strcmp(use_sd_card_value, "yes") == 0;
   bool use_tls = strcmp(use_tls_value, "yes") == 0;
 
-  if (use_sdcard)
-  {
+  if (use_sdcard) {
     // Confirm that the SD card is usable
     char *sd_file_system = get_sd_filesystem();
-    if (sd_file_system == NULL)
-    {
+    if (sd_file_system == NULL) {
       syslog(LOG_ERR,
              "Couldn't identify the file system of the SD card at %s",
              sd_card_path);
@@ -275,8 +259,7 @@ start_dockerd(void)
     }
 
     if (strcmp(sd_file_system, "vfat") == 0 ||
-        strcmp(sd_file_system, "exfat") == 0)
-    {
+        strcmp(sd_file_system, "exfat") == 0) {
       syslog(LOG_ERR,
              "The SD card at %s uses file system %s which does not support "
              "Unix file permissions. Please reformat to a file system that "
@@ -286,77 +269,74 @@ start_dockerd(void)
       goto end;
     }
 
-    if (!setup_sdcard())
-    {
+    if (!setup_sdcard()) {
       syslog(LOG_ERR, "Failed to setup SD card.");
       goto end;
     }
   }
 
-  if (use_tls)
-  {
-    const char *ca_path = "/usr/local/packages/dockerdwrapperwithcompose/ca.pem";
+  if (use_tls) {
+    const char *ca_path =
+        "/usr/local/packages/dockerdwrapperwithcompose/ca.pem";
     const char *cert_path =
         "/usr/local/packages/dockerdwrapperwithcompose/server-cert.pem";
-    const char *key_path = "/usr/local/packages/dockerdwrapperwithcompose/server-key.pem";
+    const char *key_path =
+        "/usr/local/packages/dockerdwrapperwithcompose/server-key.pem";
 
     bool ca_exists = access(ca_path, F_OK) == 0;
     bool cert_exists = access(cert_path, F_OK) == 0;
     bool key_exists = access(key_path, F_OK) == 0;
 
-    if (!ca_exists)
-    {
+    if (!ca_exists) {
       syslog(LOG_ERR,
              "Cannot start using TLS, no CA certificate found at %s",
              ca_path);
     }
-    if (!cert_exists)
-    {
+    if (!cert_exists) {
       syslog(LOG_ERR,
              "Cannot start using TLS, no server certificate found at %s",
              cert_path);
     }
-    if (!key_exists)
-    {
+    if (!key_exists) {
       syslog(LOG_ERR,
              "Cannot start using TLS, no server key found at %s",
              key_path);
     }
 
-    if (!ca_exists || !cert_exists || !key_exists)
-    {
+    if (!ca_exists || !cert_exists || !key_exists) {
       goto end;
     }
 
-    if (use_sdcard)
-    {
+    if (use_sdcard) {
       syslog(LOG_INFO,
              "Starting dockerd in TLS mode using SD card as storage.");
       result = g_spawn_async(
           NULL,
-          (gchar *[]){
-              "dockerd",
-              "-H",
-              "tcp://0.0.0.0:2376",
-              "--config-file",
-              "/usr/local/packages/dockerdwrapperwithcompose/localdata/daemon.json",
-              "--data-root",
-              "/var/spool/storage/SD_DISK/dockerd/data",
-              "--exec-root",
-              "/var/spool/storage/SD_DISK/dockerd/exec",
-              "--tlsverify",
-              "--tlscacert=/usr/local/packages/dockerdwrapperwithcompose/ca.pem",
-              "--tlscert=/usr/local/packages/dockerdwrapperwithcompose/server-cert.pem",
-              "--tlskey=/usr/local/packages/dockerdwrapperwithcompose/server-key.pem",
-              (char *)NULL},
+          (gchar *[]){"dockerd",
+                      "-H",
+                      "tcp://0.0.0.0:2376",
+                      "--config-file",
+                      "/usr/local/packages/dockerdwrapperwithcompose/localdata/"
+                      "daemon.json",
+                      "--data-root",
+                      "/var/spool/storage/SD_DISK/dockerd/data",
+                      "--exec-root",
+                      "/var/spool/storage/SD_DISK/dockerd/exec",
+                      "--tlsverify",
+                      "--tlscacert=/usr/local/packages/"
+                      "dockerdwrapperwithcompose/ca.pem",
+                      "--tlscert=/usr/local/packages/dockerdwrapperwithcompose/"
+                      "server-cert.pem",
+                      "--tlskey=/usr/local/packages/dockerdwrapperwithcompose/"
+                      "server-key.pem",
+                      (char *)NULL},
           NULL,
           G_SPAWN_DO_NOT_REAP_CHILD | G_SPAWN_SEARCH_PATH,
           NULL,
           NULL,
           &dockerd_process_pid,
           &error);
-      if (!result)
-      {
+      if (!result) {
         syslog(
             LOG_ERR,
             "Could not execv the dockerd process. Return value: %d, error: %s",
@@ -364,31 +344,31 @@ start_dockerd(void)
             strerror(errno));
         goto end;
       }
-    }
-    else
-    {
+    } else {
       syslog(LOG_INFO, "Starting dockerd in TLS mode using internal storage.");
       result = g_spawn_async(
           NULL,
-          (gchar *[]){
-              "dockerd",
-              "-H",
-              "tcp://0.0.0.0:2376",
-              "--config-file",
-              "/usr/local/packages/dockerdwrapperwithcompose/localdata/daemon.json",
-              "--tlsverify",
-              "--tlscacert=/usr/local/packages/dockerdwrapperwithcompose/ca.pem",
-              "--tlscert=/usr/local/packages/dockerdwrapperwithcompose/server-cert.pem",
-              "--tlskey=/usr/local/packages/dockerdwrapperwithcompose/server-key.pem",
-              (char *)NULL},
+          (gchar *[]){"dockerd",
+                      "-H",
+                      "tcp://0.0.0.0:2376",
+                      "--config-file",
+                      "/usr/local/packages/dockerdwrapperwithcompose/localdata/"
+                      "daemon.json",
+                      "--tlsverify",
+                      "--tlscacert=/usr/local/packages/"
+                      "dockerdwrapperwithcompose/ca.pem",
+                      "--tlscert=/usr/local/packages/dockerdwrapperwithcompose/"
+                      "server-cert.pem",
+                      "--tlskey=/usr/local/packages/dockerdwrapperwithcompose/"
+                      "server-key.pem",
+                      (char *)NULL},
           NULL,
           G_SPAWN_DO_NOT_REAP_CHILD | G_SPAWN_SEARCH_PATH,
           NULL,
           NULL,
           &dockerd_process_pid,
           &error);
-      if (!result)
-      {
+      if (!result) {
         syslog(
             LOG_ERR,
             "Could not execv the dockerd process. Return value: %d, error: %s",
@@ -397,33 +377,30 @@ start_dockerd(void)
       }
       goto end;
     }
-  }
-  else
-  {
-    if (use_sdcard)
-    {
+  } else {
+    if (use_sdcard) {
       syslog(LOG_INFO, "Starting unsecured dockerd using SD card as storage.");
-      result =
-          g_spawn_async(NULL,
-                        (gchar *[]){"dockerd",
-                                    "-H",
-                                    "tcp://0.0.0.0:2375",
-                                    "--data-root",
-                                    "/var/spool/storage/SD_DISK/dockerd/data",
-                                    "--exec-root",
-                                    "/var/spool/storage/SD_DISK/dockerd/exec",
-                                    "--config-file",
-                                    "/usr/local/packages/dockerdwrapperwithcompose/localdata/daemon.json",
-                                    "--tls=false",
-                                    (char *)NULL},
-                        NULL,
-                        G_SPAWN_DO_NOT_REAP_CHILD | G_SPAWN_SEARCH_PATH,
-                        NULL,
-                        NULL,
-                        &dockerd_process_pid,
-                        &error);
-      if (!result)
-      {
+      result = g_spawn_async(
+          NULL,
+          (gchar *[]){"dockerd",
+                      "-H",
+                      "tcp://0.0.0.0:2375",
+                      "--data-root",
+                      "/var/spool/storage/SD_DISK/dockerd/data",
+                      "--exec-root",
+                      "/var/spool/storage/SD_DISK/dockerd/exec",
+                      "--config-file",
+                      "/usr/local/packages/dockerdwrapperwithcompose/localdata/"
+                      "daemon.json",
+                      "--tls=false",
+                      (char *)NULL},
+          NULL,
+          G_SPAWN_DO_NOT_REAP_CHILD | G_SPAWN_SEARCH_PATH,
+          NULL,
+          NULL,
+          &dockerd_process_pid,
+          &error);
+      if (!result) {
         syslog(
             LOG_ERR,
             "Could not execv the dockerd process. Return value: %d, error: %s",
@@ -431,26 +408,25 @@ start_dockerd(void)
             strerror(errno));
         goto end;
       }
-    }
-    else
-    {
+    } else {
       syslog(LOG_INFO, "Starting unsecured dockerd using internal storage.");
-      result = g_spawn_async(NULL,
-                             (gchar *[]){"dockerd",
-                                         "-H",
-                                         "tcp://0.0.0.0:2375",
-                                         "--config-file",
-                                         "/usr/local/packages/dockerdwrapperwithcompose/localdata/daemon.json",
-                                         "--tls=false",
-                                         (char *)NULL},
-                             NULL,
-                             G_SPAWN_DO_NOT_REAP_CHILD | G_SPAWN_SEARCH_PATH,
-                             NULL,
-                             NULL,
-                             &dockerd_process_pid,
-                             &error);
-      if (!result)
-      {
+      result = g_spawn_async(
+          NULL,
+          (gchar *[]){"dockerd",
+                      "-H",
+                      "tcp://0.0.0.0:2375",
+                      "--config-file",
+                      "/usr/local/packages/dockerdwrapperwithcompose/localdata/"
+                      "daemon.json",
+                      "--tls=false",
+                      (char *)NULL},
+          NULL,
+          G_SPAWN_DO_NOT_REAP_CHILD | G_SPAWN_SEARCH_PATH,
+          NULL,
+          NULL,
+          &dockerd_process_pid,
+          &error);
+      if (!result) {
         syslog(
             LOG_ERR,
             "Could not execv the dockerd process. Return value: %d, error: %s",
@@ -464,8 +440,7 @@ start_dockerd(void)
   // Watch the child process.
   g_child_watch_add(dockerd_process_pid, dockerd_process_exited_callback, NULL);
 
-  if (!is_process_alive(dockerd_process_pid))
-  {
+  if (!is_process_alive(dockerd_process_pid)) {
     // The process died during adding of callback, tell loop to quit.
     exit_code = -1;
     g_main_loop_quit(loop);
@@ -491,8 +466,7 @@ static bool
 stop_dockerd(void)
 {
   bool killed = false;
-  if (dockerd_process_pid == -1)
-  {
+  if (dockerd_process_pid == -1) {
     // Nothing to stop.
     killed = true;
     goto end;
@@ -500,8 +474,7 @@ stop_dockerd(void)
 
   // Send SIGTERM to the process
   bool sigterm_successfully_sent = kill(dockerd_process_pid, SIGTERM) == 0;
-  if (!sigterm_successfully_sent)
-  {
+  if (!sigterm_successfully_sent) {
     syslog(
         LOG_ERR, "Failed to send SIGTERM to child. Error: %s", strerror(errno));
     errno = 0;
@@ -513,16 +486,14 @@ stop_dockerd(void)
   // passed.
   sleep(10);
 
-  if (dockerd_process_pid == -1)
-  {
+  if (dockerd_process_pid == -1) {
     killed = true;
     goto end;
   }
 
   // SIGTERM failed, let's try SIGKILL
   killed = kill(dockerd_process_pid, SIGKILL) == 0;
-  if (!killed)
-  {
+  if (!killed) {
     syslog(
         LOG_ERR, "Failed to send SIGKILL to child. Error: %s", strerror(errno));
   }
@@ -539,8 +510,7 @@ dockerd_process_exited_callback(__attribute__((unused)) GPid pid,
                                 __attribute__((unused)) gpointer user_data)
 {
   GError *error = NULL;
-  if (!g_spawn_check_exit_status(status, &error))
-  {
+  if (!g_spawn_check_exit_status(status, &error)) {
     syslog(LOG_ERR, "Dockerd process exited with error: %d", status);
     g_clear_error(&error);
 
@@ -554,18 +524,14 @@ dockerd_process_exited_callback(__attribute__((unused)) GPid pid,
   // manner. Remove it manually.
   remove("/var/run/docker.pid");
 
-  if (restart_dockerd)
-  {
+  if (restart_dockerd) {
     restart_dockerd = false;
-    if (!start_dockerd())
-    {
+    if (!start_dockerd()) {
       syslog(LOG_ERR, "Failed to restart dockerd, exiting.");
       exit_code = -1;
       g_main_loop_quit(loop);
     }
-  }
-  else
-  {
+  } else {
     // We shouldn't restart, stop instead.
     g_main_loop_quit(loop);
   }
@@ -585,18 +551,13 @@ parameter_changed_callback(const gchar *name,
 {
   const gchar *parname = name += strlen("root.dockerdwrapperwithcompose.");
   // bool dockerd_started_correctly = false;
-  if (strcmp(parname, "SDCardSupport") == 0)
-  {
+  if (strcmp(parname, "SDCardSupport") == 0) {
     syslog(LOG_INFO, "SDCardSupport changed to: %s", value);
     restart_dockerd = true;
-  }
-  else if (strcmp(parname, "UseTLS") == 0)
-  {
+  } else if (strcmp(parname, "UseTLS") == 0) {
     syslog(LOG_INFO, "UseTLS changed to: %s", value);
     restart_dockerd = true;
-  }
-  else
-  {
+  } else {
     syslog(LOG_WARNING, "Parameter %s is not recognized", name);
     restart_dockerd = false;
 
@@ -605,8 +566,7 @@ parameter_changed_callback(const gchar *name,
   }
 
   // Stop the currently running process.
-  if (!stop_dockerd())
-  {
+  if (!stop_dockerd()) {
     syslog(LOG_ERR,
            "Failed to stop dockerd process. Please restart the acap "
            "manually.");
@@ -619,55 +579,54 @@ setup_axparameter(void)
 {
   bool success = false;
   GError *error = NULL;
-  AXParameter *ax_parameter = ax_parameter_new("dockerdwrapperwithcompose", &error);
-  if (ax_parameter == NULL)
-  {
+  AXParameter *ax_parameter =
+      ax_parameter_new("dockerdwrapperwithcompose", &error);
+  if (ax_parameter == NULL) {
     syslog(LOG_ERR, "Error when creating AXParameter: %s", error->message);
     goto end;
   }
 
-  gboolean geresult =
-      ax_parameter_register_callback(ax_parameter,
-                                     "root.dockerdwrapperwithcompose.SDCardSupport",
-                                     parameter_changed_callback,
-                                     NULL,
-                                     &error);
+  gboolean geresult = ax_parameter_register_callback(
+      ax_parameter,
+      "root.dockerdwrapperwithcompose.SDCardSupport",
+      parameter_changed_callback,
+      NULL,
+      &error);
 
-  if (geresult == FALSE)
-  {
+  if (geresult == FALSE) {
     syslog(LOG_ERR,
            "Could not register SDCardSupport callback. Error: %s",
            error->message);
     goto end;
   }
 
-  geresult = ax_parameter_register_callback(ax_parameter,
-                                            "root.dockerdwrapperwithcompose.UseTLS",
-                                            parameter_changed_callback,
-                                            NULL,
-                                            &error);
+  geresult =
+      ax_parameter_register_callback(ax_parameter,
+                                     "root.dockerdwrapperwithcompose.UseTLS",
+                                     parameter_changed_callback,
+                                     NULL,
+                                     &error);
 
-  if (geresult == FALSE)
-  {
+  if (geresult == FALSE) {
     syslog(LOG_ERR,
            "Could not register UseTLS callback. Error: %s",
            error->message);
-    ax_parameter_unregister_callback(ax_parameter,
-                                     "root.dockerdwrapperwithcompose.SDCardSupport");
+    ax_parameter_unregister_callback(
+        ax_parameter, "root.dockerdwrapperwithcompose.SDCardSupport");
     goto end;
   }
 
   success = true;
 
 end:
-  if (!success && ax_parameter != NULL)
-  {
+  if (!success && ax_parameter != NULL) {
     ax_parameter_free(ax_parameter);
   }
   return ax_parameter;
 }
 
-int main(void)
+int
+main(void)
 {
   GError *error = NULL;
   AXParameter *ax_parameter = NULL;
@@ -681,8 +640,7 @@ int main(void)
 
   // Setup ax_parameter
   ax_parameter = setup_axparameter();
-  if (ax_parameter == NULL)
-  {
+  if (ax_parameter == NULL) {
     syslog(LOG_ERR, "Error in setup_axparameter: %s", error->message);
     goto end;
   }
@@ -691,8 +649,7 @@ int main(void)
   loop = g_main_loop_new(NULL, FALSE);
   loop = g_main_loop_ref(loop);
 
-  if (!start_dockerd())
-  {
+  if (!start_dockerd()) {
     syslog(LOG_ERR, "Starting dockerd failed with error %s", strerror(errno));
     exit_code = -1;
     goto end;
@@ -703,19 +660,15 @@ int main(void)
   g_main_loop_unref(loop);
 
 end:
-  if (stop_dockerd())
-  {
+  if (stop_dockerd()) {
     syslog(LOG_INFO, "Shutting down. dockerd shut down successfully.");
-  }
-  else
-  {
+  } else {
     syslog(LOG_WARNING, "Shutting down. Failed to shut down dockerd.");
   }
 
-  if (ax_parameter != NULL)
-  {
-    ax_parameter_unregister_callback(ax_parameter,
-                                     "root.dockerdwrapperwithcompose.SDCardSupport");
+  if (ax_parameter != NULL) {
+    ax_parameter_unregister_callback(
+        ax_parameter, "root.dockerdwrapperwithcompose.SDCardSupport");
     ax_parameter_unregister_callback(ax_parameter,
                                      "root.dockerdwrapperwithcompose.UseTLS");
     ax_parameter_free(ax_parameter);
