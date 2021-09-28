@@ -314,6 +314,8 @@ start_dockerd(void)
           NULL,
           (gchar *[]){"dockerd",
                       "-H",
+                      "unix:///var/run/docker.sock",
+                      "-H",
                       "tcp://0.0.0.0:2376",
                       "--config-file",
                       "/usr/local/packages/dockerdwrapperwithcompose/localdata/"
@@ -350,6 +352,8 @@ start_dockerd(void)
           NULL,
           (gchar *[]){"dockerd",
                       "-H",
+                      "unix:///var/run/docker.sock",
+                      "-H",
                       "tcp://0.0.0.0:2376",
                       "--config-file",
                       "/usr/local/packages/dockerdwrapperwithcompose/localdata/"
@@ -384,6 +388,8 @@ start_dockerd(void)
           NULL,
           (gchar *[]){"dockerd",
                       "-H",
+                      "unix:///var/run/docker.sock",
+                      "-H",
                       "tcp://0.0.0.0:2375",
                       "--data-root",
                       "/var/spool/storage/SD_DISK/dockerd/data",
@@ -413,6 +419,8 @@ start_dockerd(void)
       result = g_spawn_async(
           NULL,
           (gchar *[]){"dockerd",
+                      "-H",
+                      "unix:///var/run/docker.sock",
                       "-H",
                       "tcp://0.0.0.0:2375",
                       "--config-file",
