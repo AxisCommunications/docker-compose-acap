@@ -4,6 +4,15 @@ This ACAP contains both the Docker Engine and the binaries necessary to interact
 Installing this ACAP will make it possible to run Docker containers and Docker commands directly
 on the Axis device.
 
+## Compatability
+
+The Docker Compose ACAP requires a container capable device. You may check the compatibility of your
+device by running:
+
+```sh
+ssh root@<axis_device_ip> "if command -v containerd >/dev/null 2>&1; then echo "Compatible with Docker Compose ACAP"; else echo "Not compatible with Docker Compose ACAP"; fi"
+```
+
 ## Installing
 
 The recommended way to install this acap is to use the pre-built
