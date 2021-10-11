@@ -10,7 +10,7 @@ The Docker Compose ACAP requires a container capable device. You may check the c
 device by running:
 
 ```sh
-ssh root@<axis_device_ip> "if command -v containerd >/dev/null 2>&1; then echo "Compatible with Docker Compose ACAP"; else echo "Not compatible with Docker Compose ACAP"; fi"
+ssh root@<axis_device_ip> 'command -v containerd >/dev/null 2>&1 && echo Compatible with Docker ACAP || echo Not compatible with Docker ACAP'
 ```
 
 ## Installing
