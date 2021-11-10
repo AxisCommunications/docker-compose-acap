@@ -56,19 +56,19 @@ scp ca.pem server-cert.pem server-key.pem root@<axis_device_ip>:/usr/local/packa
 #### The Certificate Authority (CA) certificate
 
 This certificate needs to be present in the dockerdwrapperwithcompose package folder on the
-camera and be named "ca.perm". The full path of the file should be
+camera and be named "ca.pem". The full path of the file should be
 "/usr/local/packages/dockerdwrapperwithcompose/ca.pem".
 
 #### The server certificate
 
 This certificate needs to be present in the dockerdwrapperwithcompose package folder on the
-camera and be named "server-cert.perm". The full path of the file should be
+camera and be named "server-cert.pem". The full path of the file should be
 "/usr/local/packages/dockerdwrapperwithcompose/server-cert.pem".
 
 #### The private server key
 
 This key needs to be present in the dockerdwrapperwithcompose package folder on the camera
-and be named "server-key.perm". The full path of the file should be
+and be named "server-key.pem". The full path of the file should be
 "/usr/local/packages/dockerdwrapperwithcompose/server-key.pem".
 
 #### Client keys and certificates
