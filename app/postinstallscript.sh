@@ -15,7 +15,7 @@ BindsTo=containerd.service
 After=network-online.target containerd.service var-spool-storage-SD_DISK.mount
 Wants=network-online.target
 [Service]
-Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/usr/local/packages/dockerdwrapperwithcompose
+Environment=PATH=/usr/local/packages/dockerdwrapperwithcompose:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin
 EOF
 
 # Create docker symbolic link
