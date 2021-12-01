@@ -1,10 +1,6 @@
 #!/bin/sh
 case "$1" in
-    armv7hf)
-       strip=arm-none-eabi-strip
-       ;;
-    aarch64)
-       strip=aarch64-none-elf-strip
+    armv7hf|aarch64)
        ;;
     *)
        # error
@@ -20,9 +16,8 @@ dockerdname=dockerd_name
 
 # First we build and copy out dockerd
 docker build --build-arg ACAPARCH="$1" \
-             --build-arg STRIP=$strip \
-             --build-arg HTTP_PROXY \
-             --build-arg HTTPS_PROXY \
+             --build-arg HTTP_PROXY="$HTTP_PROXY" \
+             --build-arg HTTPS_PROXY="$HTTPS_PROXY" \
              --tag $dockerdtag \
              --no-cache \
              --file Dockerfile.dockerd .
@@ -40,6 +35,8 @@ docker rm $dockerdname
 
 # Now build and copy out the acap
 docker build --build-arg ACAPARCH="$1" \
+             --build-arg HTTP_PROXY="$HTTP_PROXY" \
+             --build-arg HTTPS_PROXY="$HTTPS_PROXY" \
              --file Dockerfile.acap \
              --no-cache \
              --tag "$imagetag" . 

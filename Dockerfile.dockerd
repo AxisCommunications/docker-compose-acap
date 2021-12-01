@@ -4,6 +4,9 @@ FROM docker:$DOCKER_IMAGE_VERSION
 ARG HTTP_PROXY
 ARG HTTPS_PROXY
 
+ENV HTTPS_PROXY ${HTTPS_PROXY}
+ENV HTTP_PROXY ${HTTP_PROXY}
+
 RUN mkdir /opt/dockerd
 WORKDIR /opt/dockerd
 
@@ -11,12 +14,11 @@ WORKDIR /opt/dockerd
 COPY Makefile.dockerd .
 COPY DOCKERVERSION .
 COPY 0001-Use-stretch-as-base-to-work-on-ARTPEC-6-7.patch .
+COPY 0001-Set-docker-proxy-via-build-arg.patch .
 
 # Install the packages we use
 RUN apk add --update \
     bash \
-    binutils-aarch64-none-elf \
-    binutils-arm-none-eabi \
     curl \
     git \
     make \
@@ -24,8 +26,6 @@ RUN apk add --update \
 
 # Setup the environment
 ARG ACAPARCH=armv7hf
-ARG STRIP=arm-none-eabi-strip
 ENV ARCH ${ACAPARCH}
-ENV STRIP ${STRIP}
 
 ENTRYPOINT [ "make", "-f", "Makefile.dockerd" ] 
