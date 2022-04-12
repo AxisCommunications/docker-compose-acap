@@ -287,9 +287,8 @@ start_dockerd(void)
   args_offset += g_snprintf(
       args + args_offset,
       args_len - args_offset,
-      "%s %s %s",
+      "%s %s",
       "dockerd",
-      "-H tcp://0.0.0.0:2375",
       "--config-file "
       "/usr/local/packages/dockerdwrapperwithcompose/localdata/daemon.json");
 
@@ -329,7 +328,8 @@ start_dockerd(void)
 
     args_offset += g_snprintf(args + args_offset,
                               args_len - args_offset,
-                              " %s %s %s %s %s %s %s",
+                              " %s %s %s %s %s %s %s %s",
+                              "-H tcp://0.0.0.0:2376",
                               "--tlsverify",
                               "--tlscacert",
                               ca_path,
@@ -341,7 +341,9 @@ start_dockerd(void)
     g_strlcat(msg, " in TLS mode", msg_len);
   } else {
     args_offset += g_snprintf(
-        args + args_offset, args_len - args_offset, " %s", "--tls=false");
+        args + args_offset, args_len - args_offset, " %s %s", 
+        "-H tcp://0.0.0.0:2375",
+        "--tls=false");
 
     g_strlcat(msg, " in unsecured mode", msg_len);
   }
