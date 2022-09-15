@@ -95,11 +95,12 @@ Key, certificate and CA shall be used when running Docker against the dockerd da
 the Axis device. See below for an example:
 
 ```sh
+DOCKER_PORT=2376
 docker --tlsverify \
        --tlscacert=ca.pem \
        --tlscert=client-cert.pem \
        --tlskey=client-key.pem \
-       -H=<device ip>:2376 \
+       -H=<device ip>:$DOCKER_PORT \
        version
 ```
 
@@ -108,8 +109,9 @@ automatically use your key and certificate, please export the `DOCKER_CERT_PATH`
 
 ```sh
 export DOCKER_CERT_PATH=<client certificate directory>
+DOCKER_PORT=2376
 docker --tlsverify \
-       -H=<device ip>:2376 \
+       -H=<device ip>:$DOCKER_PORT \
        version
 ```
 
@@ -173,16 +175,17 @@ This can be achieved by using the -H flag when running the docker command on the
 The port used will change depending on if the Docker Compose ACAP runs using TLS or not.
 The Docker Compose ACAP will be reachable on port 2375 when running unsecured, and on
 port 2376 when running secured using TLS. Please read section
-[Securing the Docker Compose ACAP using TLS](#securing-the-docker-acap-using-tls) for
+[Securing the Docker Compose ACAP using TLS](#securing-the-docker-compose-acap-using-tls) for
 more information.
 Below is an example of how to remotely run a docker command on an Axis device running
 the Docker Compose ACAP in unsecured mode:
 
 ```sh
-docker -H=<device ip>:2375 version
+DOCKER_INSECURE_PORT=2375
+docker -H=<device ip>:$DOCKER_INSECURE_PORT version
 ```
 
-See [Client keys and certificates](#client-keys-and-certificates) for an example
+See [Client key and certificate](#client-key-and-certificate) for an example
 of how to remotely run docker commands on a device running a secured Docker Compose ACAP
 using TLS.
 
