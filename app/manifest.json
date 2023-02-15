@@ -3,6 +3,7 @@
     "acapPackageConf": {
         "setup": {
             "friendlyName": "Docker Daemon with Compose",
+            "appId": "414150",
             "appName": "dockerdwrapperwithcompose",
             "vendor": "Axis Communications",
             "embeddedSdkVersion": "3.0",
