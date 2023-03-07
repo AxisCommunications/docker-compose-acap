@@ -6,6 +6,8 @@ on the Axis device.
 
 ## Compatibility
 
+### Device
+
 The Docker Compose ACAP requires a container capable device. You may check the compatibility of your
 device by running:
 
@@ -21,6 +23,13 @@ ssh root@$DEVICE_IP 'command -v containerd >/dev/null 2>&1 && echo Compatible wi
 
 where `<device ip>` is the IP address of the Axis device and `<password>` is the root password. Please
 note that you need to enclose your password with quotes (`'`) if it contains special characters.
+
+### Host
+
+The host machine is required to have either [Docker Desktop](https://docs.docker.com/desktop/)
+minimum version 4.11.1, or [Docker Engine](https://docs.docker.com/engine/) minimum version
+20.10.17 installed. To build Docker ACAP locally it is required have
+[BuildKit](https://docs.docker.com/build/buildkit/) enabled.
 
 ## Installing
 
@@ -199,34 +208,32 @@ using TLS.
 
 ## Building the Docker Compose ACAP
 
-### armv7hf
+Docker Compose ACAP is built in two steps using two Dockerfiles. Too simplify the process a handy shell
+script is provided. Note that Buildkit is required to be enabled for the build.
 
 ```sh
-./build.sh armv7hf
+# Build Docker ACAP image
+./build.sh <ARCH> docker-acap-with-compose:<ARCH>
 ```
 
-### aarch64
-
-```sh
-./build.sh aarch64
-```
+where `<ARCH>` is either `armv7hf` or `aarch64`. The script will produce a Docker image,
+`docker-acap-with-compose:<ARCH>`, and also a folder `build` containing artifacts from the build,
+among them the Docker Compose ACAP as an .eap file.
 
 ## Installing a locally built Docker Compose ACAP
 
-Installation can be done in two ways. Either by using the built docker image:
+Installation can be done in two ways. Either by using the locally built docker image:
 
 ```sh
 docker run --rm docker-acap-with-compose:1.0 <device ip> <rootpasswd> install
 ```
 
-Or by manually navigating to device GUI by browsing to the following page
-(replace `<device ip>` with the IP number of your Axis video device)
+Or by manually installing the .eap file from the `build` folder by using the Web GUI in the device:
 
 ```sh
 http://<device ip>/#settings/apps
 ```
 
 Go to your device web page above > Click on the tab **App** in the device GUI >
-Add **(+)** sign and browse to the newly built
-**Docker_Daemon_with_Compose_1_1_0_<arch>.eap** > Click **Install** > Run the application by
+Add **(+)** sign and browse to the newly built .eap-file > Click **Install** > Run the application by
 enabling the **Start** switch.
