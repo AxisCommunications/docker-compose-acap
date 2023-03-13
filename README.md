@@ -218,7 +218,7 @@ installed.
 ```
 
 where `<ARCH>` is either `armv7hf` or `aarch64`. The script will produce a Docker image,
-`docker-acap-with-compose:<ARCH>`, and also a folder `build` containing artifacts from the build,
+`docker-acap-with-compose:<ARCH>`, and also a folder `build-<ARCH>` containing artifacts from the build,
 among them the Docker Compose ACAP as an .eap file.
 
 ## Installing a locally built Docker Compose ACAP
@@ -229,7 +229,7 @@ Installation can be done in two ways. Either by using the locally built docker i
 docker run --rm docker-acap-with-compose:1.0 <device ip> <rootpasswd> install
 ```
 
-Or by manually installing the .eap file from the `build` folder by using the Web GUI in the device:
+Or by manually installing the .eap file from the `build-<ARCH>` folder by using the Web GUI in the device:
 
 ```sh
 http://<device ip>/#settings/apps
