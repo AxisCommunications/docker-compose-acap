@@ -33,7 +33,25 @@ and [Buildx](https://docs.docker.com/build/install-buildx/) installed.
 
 ## Installing
 
-The recommended way to install this ACAP is to use the pre-built
+The Docker Compose application is available as a **signed** eap-file in [Releases][latest-releases],
+this is the recommended way to install this ACAP.
+
+Signing of the prebuilt Docker Compose application will be the standard after version 1.2.0, read
+more about signing [here][signing-documentation].
+
+### Installing versions after 1.2.0
+
+The recomended installation of this application is to download any signed eap-file from
+[prereleases or releases][all-releases] with a tag on the form `<version>_<ARCH>`,
+where `<version>` is the docker-compose-acap release version and `<ARCH>` is either
+`armv7hf` or `aarch64` depending on device architecture.
+E.g. `Signed_Docker_Compose_1_3_0_aarch64.eap`.
+The eap-file can be installed as an ACAP application on the device,
+where it can be controlled in the device GUI **Apps** tab.
+
+### Installing version 1.2.0 and earlier
+
+To install this ACAP with version 1.2.0 or earlier use the pre-built
 [docker hub](https://hub.docker.com/r/axisecp/docker-compose-acap) image:
 
 ```sh
@@ -238,3 +256,11 @@ http://<device ip>/#settings/apps
 Go to your device web page above > Click on the tab **App** in the device GUI >
 Add **(+)** sign and browse to the newly built .eap-file > Click **Install** > Run the application by
 enabling the **Start** switch.
+
+<!-- Links to external references -->
+<!-- markdownlint-disable MD034 -->
+[all-releases]: https://github.com/AxisCommunications/docker-compose-acap/releases
+[latest-releases]: https://github.com/AxisCommunications/docker-compose-acap/releases/latest
+[signing-documentation]: https://axiscommunications.github.io/acap-documentation/docs/faq/security.
+
+<!-- markdownlint-enable MD034 -->
