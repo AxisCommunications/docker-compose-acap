@@ -48,7 +48,7 @@ where it can be controlled in the device GUI **Apps** tab.
 ```sh
 # Get download url for a signed ACAP with curl
 # Where <ARCH> is the architecture
-curl -s https://api.github.com/repos/AxisCommunications/docker-acap/releases/latest | grep "browser_download_url.*Signed_Docker_Daemon_with_Compose_.*_<ARCH>\.eap"
+curl -s https://api.github.com/repos/AxisCommunications/docker-compose-acap/releases/latest | grep "browser_download_url.*Signed_Docker_Daemon_with_Compose_.*_<ARCH>\.eap"
 ```
 
 ### Installation of version 1.2.5 and previous
