@@ -41,14 +41,14 @@ The prebuilt Docker Compose ACAP application is signed, read more about signing 
 Download and install any signed eap-file from [prereleases or releases][all-releases]
 with a tag on the form `<version>_<ARCH>`, where `<version>` is the docker-compose-acap release version
 and `<ARCH>` is either `armv7hf` or `aarch64` depending on device architecture.
-E.g. `Signed_Docker_Daemon_with_Compose_1_3_0_aarch64.eap`.
+E.g. `Docker_Daemon_with_Compose_1_3_0_aarch64_signed.eap`.
 The eap-file can be installed as an ACAP application on the device,
 where it can be controlled in the device GUI **Apps** tab.
 
 ```sh
 # Get download url for a signed ACAP with curl
 # Where <ARCH> is the architecture
-curl -s https://api.github.com/repos/AxisCommunications/docker-compose-acap/releases/latest | grep "browser_download_url.*Signed_Docker_Daemon_with_Compose_.*_<ARCH>\.eap"
+curl -s https://api.github.com/repos/AxisCommunications/docker-compose-acap/releases/latest | grep "browser_download_url.*Docker_Daemon_with_Compose_.*_<ARCH>\_signed.eap"
 ```
 
 ### Installation of version 1.2.5 and previous
