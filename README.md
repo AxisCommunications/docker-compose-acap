@@ -33,7 +33,27 @@ and [Buildx](https://docs.docker.com/build/install-buildx/) installed.
 
 ## Installing
 
-The recommended way to install this ACAP is to use the pre-built
+The Docker Compose application is available as a **signed** eap-file in [Releases][latest-releases],
+this is the recommended way to install this ACAP.
+
+The prebuilt Docker Compose ACAP application is signed, read more about signing [here][signing-documentation].
+
+Download and install any signed eap-file from [prereleases or releases][all-releases]
+with a tag on the form `<version>_<ARCH>`, where `<version>` is the docker-compose-acap release version
+and `<ARCH>` is either `armv7hf` or `aarch64` depending on device architecture.
+E.g. `Docker_Daemon_with_Compose_1_3_0_aarch64_signed.eap`.
+The eap-file can be installed as an ACAP application on the device,
+where it can be controlled in the device GUI **Apps** tab.
+
+```sh
+# Get download url for a signed ACAP with curl
+# Where <ARCH> is the architecture
+curl -s https://api.github.com/repos/AxisCommunications/docker-compose-acap/releases/latest | grep "browser_download_url.*Docker_Daemon_with_Compose_.*_<ARCH>\_signed.eap"
+```
+
+### Installation of version 1.2.5 and previous
+
+To install this ACAP with version 1.2.5 or previous use the pre-built
 [docker hub](https://hub.docker.com/r/axisecp/docker-compose-acap) image:
 
 ```sh
@@ -238,3 +258,11 @@ http://<device ip>/#settings/apps
 Go to your device web page above > Click on the tab **App** in the device GUI >
 Add **(+)** sign and browse to the newly built .eap-file > Click **Install** > Run the application by
 enabling the **Start** switch.
+
+<!-- Links to external references -->
+<!-- markdownlint-disable MD034 -->
+[all-releases]: https://github.com/AxisCommunications/docker-compose-acap/releases
+[latest-releases]: https://github.com/AxisCommunications/docker-compose-acap/releases/latest
+[signing-documentation]: https://axiscommunications.github.io/acap-documentation/docs/faq/security.
+
+<!-- markdownlint-enable MD034 -->
