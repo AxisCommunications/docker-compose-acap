@@ -263,6 +263,6 @@ enabling the **Start** switch.
 <!-- markdownlint-disable MD034 -->
 [all-releases]: https://github.com/AxisCommunications/docker-compose-acap/releases
 [latest-releases]: https://github.com/AxisCommunications/docker-compose-acap/releases/latest
-[signing-documentation]: https://axiscommunications.github.io/acap-documentation/docs/faq/security.
+[signing-documentation]: https://axiscommunications.github.io/acap-documentation/docs/faq/security.html#sign-acap-applications
 
 <!-- markdownlint-enable MD034 -->
