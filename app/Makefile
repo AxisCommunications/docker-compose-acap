@@ -14,7 +14,7 @@ CFLAGS += -W -Wformat=2 -Wpointer-arith -Wbad-function-cast -Wstrict-prototypes 
 ifeq ($(ARCH),arm64)
   ACAPARCH = aarch64
   DOCKERARCH = aarch64
-  DOCKER_COMPOSE_ARCH = arm64
+  DOCKER_COMPOSE_ARCH = aarch64
 else ifeq ($(ARCH),arm)
   ACAPARCH = armv7hf
   DOCKERARCH = armhf
