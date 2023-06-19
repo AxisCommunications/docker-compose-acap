@@ -1,4 +1,4 @@
-build/
+build*/
 dockerd
 docker-compose
 docker-init
