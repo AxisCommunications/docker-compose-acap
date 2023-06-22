@@ -10,7 +10,7 @@ case "${1:-}" in
 esac
 
 dockerdtag=dockerd:1.0
-imagetag=imagetag=${2:-docker-acap-with-compose:1.0}
+imagetag=${2:-docker-acap-with-compose:1.0}
 dockerdname=dockerd_name
 
 # First we build and copy out dockerd
