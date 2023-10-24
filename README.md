@@ -228,28 +228,30 @@ using TLS.
 
 ## Building the Docker Compose ACAP
 
-Docker Compose ACAP is built in two steps using two Dockerfiles. Too simplify the process a
-handy shell script is provided. Note that Buildx is used and therefore required to be
-installed.
+To build the Docker Compose ACAP use docker buildx with the provided Dockerfile:
 
 ```sh
 # Build Docker ACAP image
-./build.sh <ARCH> docker-acap-with-compose:<ARCH>
+docker buildx build --file Dockerfile --tag docker-acap-with-compose:<ARCH> --build-arg ACAPARCH=<ARCH> .
 ```
 
-where `<ARCH>` is either `armv7hf` or `aarch64`. The script will produce a Docker image,
-`docker-acap-with-compose:<ARCH>`, and also a folder `build-<ARCH>` containing artifacts from the build,
-among them the Docker Compose ACAP as an .eap file.
+where `<ARCH>` is either `armv7hf` or `aarch64`.
+
+To extract the Docker ACAP eap-file use docker cp to copy it to a `build` folder:
+
+```sh
+docker cp "$(docker create "docker-acap-with-compose:<ARCH>")":/opt/app/ ./build
+```
 
 ## Installing a locally built Docker Compose ACAP
 
-Installation can be done in two ways. Either by using the locally built docker image:
+Installation can be done either by running the locally built docker image:
 
 ```sh
 docker run --rm docker-acap-with-compose:1.0 <device ip> <rootpasswd> install
 ```
 
-Or by manually installing the .eap file from the `build-<ARCH>` folder by using the Web GUI in the device:
+Or by manually installing the .eap file from the `build` folder by using the Web GUI in the device:
 
 ```sh
 http://<device ip>/#settings/apps
