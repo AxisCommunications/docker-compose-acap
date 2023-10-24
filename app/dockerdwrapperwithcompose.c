@@ -95,7 +95,7 @@ is_process_alive(int pid)
     // Report errors as dead.
     return false;
   } else if (return_pid == dockerd_process_pid) {
-    // Child is alread exited, so not alive.
+    // Child is already exited, so not alive.
     return false;
   }
   return true;
@@ -340,10 +340,11 @@ start_dockerd(void)
 
     g_strlcat(msg, " in TLS mode", msg_len);
   } else {
-    args_offset += g_snprintf(
-        args + args_offset, args_len - args_offset, " %s %s", 
-        "-H tcp://0.0.0.0:2375",
-        "--tls=false");
+    args_offset += g_snprintf(args + args_offset,
+                              args_len - args_offset,
+                              " %s %s",
+                              "-H tcp://0.0.0.0:2375",
+                              "--tls=false");
 
     g_strlcat(msg, " in unsecured mode", msg_len);
   }
