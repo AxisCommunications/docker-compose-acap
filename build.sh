@@ -13,8 +13,8 @@ imagetag="${2:-docker-acap-with-compose:1.0}"
 
 # Now build and copy out the acap
 docker buildx build --build-arg ACAPARCH="$1" \
-             --build-arg HTTP_PROXY="$HTTP_PROXY" \
-             --build-arg HTTPS_PROXY="$HTTPS_PROXY" \
+             --build-arg HTTP_PROXY="${HTTP_PROXY:-}" \
+             --build-arg HTTPS_PROXY="${HTTPS_PROXY:-}" \
              --file Dockerfile \
              --no-cache \
              --tag "$imagetag" . 
