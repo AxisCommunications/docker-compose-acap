@@ -71,18 +71,21 @@ COPY --from=acap-sdk /opt/axis/acapsdk/sysroots/${ACAPARCH}/usr/lib/pkgconfig/ax
 COPY app /opt/app
 COPY --from=ps /export/ps /opt/app
 
+# Get docker* binaries and scripts
 RUN <<EOF
     if [ "$ACAPARCH" = "armv7hf" ]; then
         export DOCKER_ARCH="armhf";
+        export DOCKER_COMPOSE_ARCH="armv7";
     elif [ "$ACAPARCH" = "aarch64" ]; then
         export DOCKER_ARCH="aarch64";
+        export DOCKER_COMPOSE_ARCH="aarch64";
     fi;
     curl -Lo docker_binaries.tgz "https://download.docker.com/linux/static/stable/${DOCKER_ARCH}/docker-${DOCKER_VERSION}.tgz" ;
     tar -xz -f docker_binaries.tgz --strip-components=1 docker/docker ;
     tar -xz -f docker_binaries.tgz --strip-components=1 docker/dockerd ;
     tar -xz -f docker_binaries.tgz --strip-components=1 docker/docker-init ;
     tar -xz -f docker_binaries.tgz --strip-components=1 docker/docker-proxy ;
-    curl -Lo docker-compose "https://github.com/docker/compose/releases/download/$(COMPOSEVERSION)/docker-compose-linux-${DOCKER_ARCH}" ;
+    curl -Lo docker-compose "https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-linux-${DOCKER_COMPOSE_ARCH}" ;
     chmod +x docker-compose
 EOF
 
