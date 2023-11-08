@@ -74,6 +74,7 @@ ln -s /usr/local/packages/dockerdwrapperwithcompose/docker-compose /usr/local/li
 
 # Create docker socket symbolic link
 ln -s /run/user/"$_uid"/docker.sock /var/run/docker.sock
-# Allow users in ssh-users group to access the socket
-# NOTE! This will (probably) not work for sdk or acap-<appname> users - this need to be addressed
-chgrp ssh-users /run/user/"$_uid"/docker.sock
+# Allow users in sdk group to access the socket
+# NOTE! This will not work for e.g ssh-users, but should work for other ACAP applications
+# provided they are part of the sdk group
+chgrp sdk /run/user/"$_uid"/docker.sock

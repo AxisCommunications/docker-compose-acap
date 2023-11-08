@@ -4,6 +4,7 @@
         "linux": {
             "user": {
                 "groups": [
+                    "sdk",
                     "storage",
                     "vdo"
                 ]
