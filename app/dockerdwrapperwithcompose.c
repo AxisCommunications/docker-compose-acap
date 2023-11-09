@@ -14,10 +14,13 @@
  * under the License.
  */
 
+#include <arpa/inet.h>
 #include <axsdk/ax_parameter.h>
 #include <errno.h>
 #include <glib.h>
 #include <mntent.h>
+#include <netdb.h>
+#include <netinet/in.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <sys/stat.h>
@@ -47,6 +50,12 @@ static const char *sd_card_path = "/var/spool/storage/SD_DISK";
 
 // True if the dockerd_exited_callback should restart dockerd
 static bool restart_dockerd = false;
+
+// All ax_parameters the acap has
+static const char *ax_parameters[] = {"IPCSocket",
+                                      "SDCardSupport",
+                                      "UseTLS",
+                                      "Verbose"};
 
 /**
  * @brief Signals handling
@@ -250,13 +259,15 @@ start_dockerd(void)
   char *use_sd_card_value = get_parameter_value("SDCardSupport");
   char *use_tls_value = get_parameter_value("UseTLS");
   char *use_ipc_socket_value = get_parameter_value("IPCSocket");
+  char *use_verbose_value = get_parameter_value("Verbose");
   if (use_sd_card_value == NULL || use_tls_value == NULL ||
-      use_ipc_socket_value == NULL) {
+      use_ipc_socket_value == NULL || use_verbose_value == NULL) {
     goto end;
   }
   bool use_sdcard = strcmp(use_sd_card_value, "yes") == 0;
   bool use_tls = strcmp(use_tls_value, "yes") == 0;
   bool use_ipc_socket = strcmp(use_ipc_socket_value, "yes") == 0;
+  bool use_verbose = strcmp(use_verbose_value, "yes") == 0;
 
   if (use_sdcard) {
     // Confirm that the SD card is usable
@@ -279,18 +290,75 @@ start_dockerd(void)
       goto end;
     }
 
+    char card_path[100];
+    strcpy(card_path, sd_card_path);
+    strcat(card_path, "/dockerd");
+
+    if (access(card_path, F_OK) == 0 && access(card_path, W_OK) != 0) {
+      syslog(LOG_ERR,
+             "The application user does not have write permissions to the SD "
+             "card directory at %s. Please change the directory permissions or "
+             "remove the directory.",
+             card_path);
+      goto end;
+    }
+
     if (!setup_sdcard()) {
       syslog(LOG_ERR, "Failed to setup SD card.");
       goto end;
     }
   }
+
+  // get host ip
+  char host_buffer[256];
+  char *IPbuffer;
+  struct hostent *host_entry;
+  gethostname(host_buffer, sizeof(host_buffer));
+  host_entry = gethostbyname(host_buffer);
+  IPbuffer = inet_ntoa(*((struct in_addr *)host_entry->h_addr_list[0]));
+
+  // construct the rootlesskit command
+  args_offset += g_snprintf(args + args_offset,
+                            args_len - args_offset,
+                            "%s %s %s %s %s %s %s %s %s",
+                            "rootlesskit",
+                            "--subid-source=static",
+                            "--net=slirp4netns",
+                            "--disable-host-loopback",
+                            "--copy-up=/etc",
+                            "--copy-up=/run",
+                            "--propagation=rslave",
+                            "--port-driver slirp4netns",
+                            /* don't use same range as company proxy */
+                            "--cidr=10.0.3.0/24");
+
+  if (use_verbose) {
+    args_offset += g_snprintf(
+        args + args_offset, args_len - args_offset, " %s", "--debug");
+  }
+
+  const uint port = use_tls ? 2376 : 2375;
+  args_offset += g_snprintf(args + args_offset,
+                            args_len - args_offset,
+                            " -p %s:%d:%d/tcp",
+                            IPbuffer,
+                            port,
+                            port);
+
+  // add dockerd arguments
   args_offset += g_snprintf(
       args + args_offset,
       args_len - args_offset,
-      "%s %s",
+      " %s %s %s",
       "dockerd",
+      "--iptables=false",
       "--config-file "
       "/usr/local/packages/dockerdwrapperwithcompose/localdata/daemon.json");
+
+  if (!use_verbose) {
+    args_offset += g_snprintf(
+        args + args_offset, args_len - args_offset, " %s", "--log-level=warn");
+  }
 
   g_strlcpy(msg, "Starting dockerd", msg_len);
 
@@ -362,11 +430,21 @@ start_dockerd(void)
   }
 
   if (use_ipc_socket) {
+    // Get uid and gid
+    uid_t uid = getuid();
+    // uid_t gid = getgid();
+
+    // The socket should reside in the user directory
+    // TODO: Ideally we would want to set the group ownership here as well, with
+    // '--group', but this does not work as expected so for now we leave it as
+    // is (default docker) which will lead to the socket group ownership set to
+    // 'addon' and a warning message from dockerd
     args_offset += g_snprintf(args + args_offset,
                               args_len - args_offset,
-                              " %s",
-                              "-H unix:///var/run/docker.sock");
-
+                              " %s%d%s",
+                              "-H unix:///var/run/user/",
+                              uid,
+                              "/docker.sock");
     g_strlcat(msg, " with IPC socket.", msg_len);
   } else {
     g_strlcat(msg, " without IPC socket.", msg_len);
@@ -374,6 +452,7 @@ start_dockerd(void)
 
   // Log startup information to syslog.
   syslog(LOG_INFO, "%s", msg);
+  syslog(LOG_INFO, "%s", args); // TODO Remove this before release of rootless
 
   args_split = g_strsplit(args, " ", 0);
   result = g_spawn_async(NULL,
@@ -409,6 +488,7 @@ end:
   free(use_sd_card_value);
   free(use_tls_value);
   free(use_ipc_socket_value);
+  free(use_verbose_value);
   g_clear_error(&error);
 
   return return_value;
@@ -479,7 +559,12 @@ dockerd_process_exited_callback(__attribute__((unused)) GPid pid,
 
   // The lockfile might have been left behind if dockerd shut down in a bad
   // manner. Remove it manually.
-  remove("/var/run/docker.pid");
+  gsize path_len = 128;
+  gchar path[path_len];
+  uid_t uid;
+  uid = getuid();
+  g_snprintf(path, path_len, "/var/run/user/%d/docker.pid", uid);
+  remove(path);
 
   if (restart_dockerd) {
     restart_dockerd = false;
@@ -507,14 +592,18 @@ parameter_changed_callback(const gchar *name,
                            __attribute__((unused)) gpointer data)
 {
   const gchar *parname = name += strlen("root.dockerdwrapperwithcompose.");
-  // bool dockerd_started_correctly = false;
-  if (strcmp(parname, "SDCardSupport") == 0) {
-    syslog(LOG_INFO, "SDCardSupport changed to: %s", value);
-    restart_dockerd = true;
-  } else if (strcmp(parname, "UseTLS") == 0) {
-    syslog(LOG_INFO, "UseTLS changed to: %s", value);
-    restart_dockerd = true;
-  } else {
+
+  bool unknown_parameter = true;
+  for (size_t i = 0; i < sizeof(ax_parameters) / sizeof(ax_parameters[0]);
+       ++i) {
+    if (strcmp(parname, ax_parameters[i]) == 0) {
+      syslog(LOG_INFO, "%s changed to: %s", ax_parameters[i], value);
+      restart_dockerd = true;
+      unknown_parameter = false;
+    }
+  }
+
+  if (unknown_parameter) {
     syslog(LOG_WARNING, "Parameter %s is not recognized", name);
     restart_dockerd = false;
 
@@ -543,34 +632,21 @@ setup_axparameter(void)
     goto end;
   }
 
-  gboolean geresult = ax_parameter_register_callback(
-      ax_parameter,
-      "root.dockerdwrapperwithcompose.SDCardSupport",
-      parameter_changed_callback,
-      NULL,
-      &error);
+  for (size_t i = 0; i < sizeof(ax_parameters) / sizeof(ax_parameters[0]);
+       ++i) {
+    char *parameter_path = g_strdup_printf(
+        "%s.%s", "root.dockerdwrapperwithcompose", ax_parameters[i]);
+    gboolean geresult = ax_parameter_register_callback(
+        ax_parameter, parameter_path, parameter_changed_callback, NULL, &error);
+    free(parameter_path);
 
-  if (geresult == FALSE) {
-    syslog(LOG_ERR,
-           "Could not register SDCardSupport callback. Error: %s",
-           error->message);
-    goto end;
-  }
-
-  geresult =
-      ax_parameter_register_callback(ax_parameter,
-                                     "root.dockerdwrapperwithcompose.UseTLS",
-                                     parameter_changed_callback,
-                                     NULL,
-                                     &error);
-
-  if (geresult == FALSE) {
-    syslog(LOG_ERR,
-           "Could not register UseTLS callback. Error: %s",
-           error->message);
-    ax_parameter_unregister_callback(
-        ax_parameter, "root.dockerdwrapperwithcompose.SDCardSupport");
-    goto end;
+    if (geresult == FALSE) {
+      syslog(LOG_ERR,
+             "Could not register %s callback. Error: %s",
+             ax_parameters[i],
+             error->message);
+      goto end;
+    }
   }
 
   success = true;
@@ -624,10 +700,13 @@ end:
   }
 
   if (ax_parameter != NULL) {
-    ax_parameter_unregister_callback(
-        ax_parameter, "root.dockerdwrapperwithcompose.SDCardSupport");
-    ax_parameter_unregister_callback(ax_parameter,
-                                     "root.dockerdwrapperwithcompose.UseTLS");
+    for (size_t i = 0; i < sizeof(ax_parameters) / sizeof(ax_parameters[0]);
+         ++i) {
+      char *parameter_path = g_strdup_printf(
+          "%s.%s", "root.dockerdwrapperwithcompose", ax_parameters[i]);
+      ax_parameter_unregister_callback(ax_parameter, parameter_path);
+      free(parameter_path);
+    }
     ax_parameter_free(ax_parameter);
   }
 
