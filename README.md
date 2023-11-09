@@ -147,7 +147,7 @@ This can be done by running the following command on the remote machine:
 scp ca.pem server-cert.pem server-key.pem root@<device ip>:/usr/local/packages/dockerdwrapperwithcompose/
 ```
 
-Once copied to the Axis device the correct permissions need to be set for the certificates: 
+Once copied to the Axis device the correct permissions need to be set for the certificates:
 
 ```sh
 ssh root@<device IP> 'chown acap-dockerdwrapperwithcompose /usr/local/packages/dockerdwrapperwithcompose/*.pem'
