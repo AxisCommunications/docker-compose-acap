@@ -430,17 +430,18 @@ start_dockerd(void)
   }
 
   if (use_ipc_socket) {
-    uid_t uid;
-    uid = getuid();
-    uid_t gid;
-    gid = getgid();
-    // The socket should reside in the user directory and have same group as
-    // user
+    // Get uid and gid 
+    uid_t uid = getuid();
+    //uid_t gid = getgid();
+
+    // The socket should reside in the user directory 
+    // TODO: Ideally we would want to set the group ownership here as well, with '--group',
+    // but this does not work as expected so for now we leave it as is (default docker)
+    // which will lead to the socket group ownership set to 'addon' and a warning message
+    // from dockerd
     args_offset += g_snprintf(args + args_offset,
                               args_len - args_offset,
-                              " %s %d %s%d%s",
-                              "--group",
-                              gid,
+                              " %s%d%s",
                               "-H unix:///var/run/user/",
                               uid,
                               "/docker.sock");
@@ -487,6 +488,7 @@ end:
   free(use_sd_card_value);
   free(use_tls_value);
   free(use_ipc_socket_value);
+  free(use_verbose_value);
   g_clear_error(&error);
 
   return return_value;

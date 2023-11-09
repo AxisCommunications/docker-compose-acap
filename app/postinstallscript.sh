@@ -53,17 +53,7 @@ EOF
 
 # reload daemon for service file changes to take effect
 systemctl daemon-reload
-# *** non-root user should be able to do this ****
 
-# Move the daemon.json file into localdata folder
-if [ ! -e localdata/daemon.json ]
-then
-    mv empty_daemon.json localdata/daemon.json
-else
-    rm empty_daemon.json
-fi
-
-# TODO Are these paths correct for non-root?
 # Create docker symbolic link
 mkdir -p /usr/local/bin
 ln -s /usr/local/packages/dockerdwrapperwithcompose/docker /usr/local/bin/docker
@@ -73,8 +63,10 @@ mkdir -p /usr/local/lib/docker/cli-plugins
 ln -s /usr/local/packages/dockerdwrapperwithcompose/docker-compose /usr/local/lib/docker/cli-plugins/docker-compose
 
 # Create docker socket symbolic link
-ln -s /run/user/"$_uid"/docker.sock /var/run/docker.sock
-# Allow users in sdk group to access the socket
-# NOTE! This will not work for e.g ssh-users, but should work for other ACAP applications
-# provided they are part of the sdk group
-chgrp sdk /run/user/"$_uid"/docker.sock
+ln -s /var/run/user/"$_uid"/docker.sock /var/run/docker.sock
+
+# *** non-root user should be able to do this ****
+
+# Move the daemon.json file into localdata folder
+mv -n empty_daemon.json localdata/daemon.json
+rm -f empty_daemon.json
