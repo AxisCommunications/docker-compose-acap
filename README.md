@@ -23,26 +23,19 @@ device. In addition it bundles the docker CLI and the docker Compose CLI.
 <!-- omit in toc -->
 ## Table of contents
 
-- [Overview](#overview)
-- [Requirements](#requirements)
-- [Installation and Usage](#installation-and-usage)
-  - [Installation](#installation)
-  - [Securing the Docker Compose ACAP using TLS](#securing-the-docker-compose-acap-using-tls)
-    - [TLS Setup](#tls-setup)
-      - [The Certificate Authority (CA) certificate](#the-certificate-authority-ca-certificate)
-      - [The server certificate](#the-server-certificate)
-      - [The private server key](#the-private-server-key)
-      - [Client key and certificate](#client-key-and-certificate)
-  - [Using an SD card as storage](#using-an-sd-card-as-storage)
-- [Using the Docker Compose ACAP](#using-the-docker-compose-acap)
-  - [Using the Docker Compose ACAP on the Axis device](#using-the-docker-compose-acap-on-the-axis-device)
-  - [Using the Docker Compose ACAP remotely](#using-the-docker-compose-acap-remotely)
-    - [Test that the Docker ACAP can run a container](#test-that-the-docker-acap-can-run-a-container)
-    - [Loading images onto a device](#loading-images-onto-a-device)
-- [Building the Docker Compose ACAP](#building-the-docker-compose-acap)
-- [Installing a locally built Docker Compose ACAP](#installing-a-locally-built-docker-compose-acap)
-- [Contributing](#contributing)
-- [License](#license)
+* [Overview](#overview)
+* [Requirements](#requirements)
+* [Installation and Usage](#installation-and-usage)
+  * [Installation](#installation)
+  * [Securing the Docker Compose ACAP using TLS](#securing-the-docker-compose-acap-using-tls)
+  * [Using an SD card as storage](#using-an-sd-card-as-storage)
+* [Using the Docker Compose ACAP](#using-the-docker-compose-acap)
+  * [Using the Docker Compose ACAP on the Axis device](#using-the-docker-compose-acap-on-the-axis-device)
+  * [Using the Docker Compose ACAP remotely](#using-the-docker-compose-acap-remotely)
+* [Building the Docker Compose ACAP](#building-the-docker-compose-acap)
+* [Installing a locally built Docker Compose ACAP](#installing-a-locally-built-docker-compose-acap)
+* [Contributing](#contributing)
+* [License](#license)
 
 ## Overview
 
@@ -69,11 +62,11 @@ the Docker Compose ACAP application.
 
 The following requirements need to be met.
 
-- Axis device:
-  - Axis OS version 11.7 or higher.
-  - The device needs to have ACAP Native SDK support. See [Axis devices & compatibility][devices]
+* Axis device:
+  * Axis OS version 11.7 or higher.
+  * The device needs to have ACAP Native SDK support. See [Axis devices & compatibility][devices]
   for more information.
-  - Additionally, the device must be container capable. To check the compatibility
+  * Additionally, the device must be container capable. To check the compatibility
   of your device run:
 
 ```sh
@@ -89,10 +82,10 @@ ssh root@$DEVICE_IP 'command -v containerd >/dev/null 2>&1 && echo Compatible wi
 where `<device ip>` is the IP address of the Axis device and `<password>` is the root password. Please
 note that you need to enclose your password with quotes (`'`) if it contains special characters.
 
-- Computer:
-  - Either [Docker Desktop][dockerDesktop] version 4.11.1 or higher, or
+* Computer:
+  * Either [Docker Desktop][dockerDesktop] version 4.11.1 or higher, or
   [Docker Engine][dockerEngine] version 20.10.17 or higher.
-  - To build Docker Compose ACAP locally it is required to have [Buildx][buildx] installed.
+  * To build Docker Compose ACAP locally it is required to have [Buildx][buildx] installed.
 
 ## Installation and Usage
 
