@@ -16,7 +16,8 @@ device. In addition it bundles the docker CLI and the docker Compose CLI.
 > * Only uid and gid are properly mapped between device and containers, not the other groups that
 > the user is a member of. This means that resources on the device, even if they are volume or device
 > mounted can be inaccessible inside the container. This can also affect usage of unsupported dbus
->  methods from the container.
+>  methods from the container. See [Using host user secondary groups in container](#using-host-user-secondary-groups-in-container)
+> for how to handle this.
 > * iptables use is disabled.
 > * The docker.socket group ownership is set to `addon`.
 
@@ -39,6 +40,7 @@ device. In addition it bundles the docker CLI and the docker Compose CLI.
   - [Using the Docker Compose ACAP remotely](#using-the-docker-compose-acap-remotely)
     - [Test that the Docker ACAP can run a container](#test-that-the-docker-acap-can-run-a-container)
     - [Loading images onto a device](#loading-images-onto-a-device)
+    - [Using host user secondary groups in container](#using-host-user-secondary-groups-in-container)
 - [Building the Docker Compose ACAP](#building-the-docker-compose-acap)
 - [Installing a locally built Docker Compose ACAP](#installing-a-locally-built-docker-compose-acap)
 - [Contributing](#contributing)
@@ -336,6 +338,31 @@ and `load` can be used.
 ```sh
 docker save <image on host local repository> | docker --tlsverify --host tcp://$DEVICE_IP:$DOCKER_PORT load
 ```
+
+#### Using host user secondary groups in container
+
+The Docker Compose ACAP is run by a non-root user on the device. This user is set
+up to be a member in a number of secondary groups as listed in the
+[manifest.json](https://github.com/AxisCommunications/docker-compose-acap/blob/rootless-preview/app/manifest.json#L6-L11)
+file. When running a container a user called `root`, (uid 0), belonging to group `root`, (gid 0)
+will be the default user inside the container. It will be mapped to the non-root user on
+the device, and the group will be mapped to the non-root users primary group.
+In order to get access inside the container to resources on the device that are group owned by any
+of the non-root users secondary groups these need to be added for the container user.
+This can be done by using `group_add` in a docker-compose.yaml (`--group-add` if using Docker cli).
+Unfortunately, adding the names of the secondary groups are not supported, instead the *mapped* ids
+of the groups need to be used. At the moment of writing this the mappings are
+
+| device group | container group id |
+| ------------ | ------------------ |
+| datacache    | "1"                |
+| sdk          | "2"                |
+| sdk          | "2"                |
+| storage      | "3"                |
+| vdo          | "4"                |
+| optics       | "5"                |
+
+Note that the names of the groups will not be correctly displayed inside the container.
 
 ## Building the Docker Compose ACAP
 
