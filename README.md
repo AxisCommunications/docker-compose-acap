@@ -38,7 +38,6 @@ device. In addition it bundles the docker CLI and the docker Compose CLI.
 * [Contributing](#contributing)
 * [License](#license)
 
-
 ## Overview
 
 The Docker Compose ACAP provides the means to run a Docker daemon on an Axis device, thereby
@@ -47,7 +46,7 @@ will run in rootless mode, i.e. the user owning the daemon process will not be r
 and in extension, the containers will not have root access to the host system.
 See [Rootless Mode][docker-rootless-mode] on Docker.com for details. That page also
 contains known limitations when running rootless Docker.
-In addition the [docker CLI[dockerCLI]] and [docker compose CLI][dockerComposeCLI]
+In addition the [docker CLI][dockerCLI] and [docker compose CLI][dockerComposeCLI]
 are included in the application, thereby providing the means to access these e.g.
 from a separate ACAP application running on the device.
 
