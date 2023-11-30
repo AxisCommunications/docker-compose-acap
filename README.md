@@ -349,7 +349,6 @@ of the groups need to be used. At the moment of writing this the mappings are
 | ------------ | ------------------ |
 | datacache    | "1"                |
 | sdk          | "2"                |
-| sdk          | "2"                |
 | storage      | "3"                |
 | vdo          | "4"                |
 | optics       | "5"                |
