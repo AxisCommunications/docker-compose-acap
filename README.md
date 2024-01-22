@@ -38,8 +38,8 @@ this is the recommended way to install this ACAP.
 
 > [!IMPORTANT]
 > From AXIS OS 11.8 `root` user is not allowed by default and in 12.0 it will be disallowed completely. Read more on the [Developer Community](https://www.axis.com/developer-community/news/axis-os-root-acap-signing). \
-> Docker ACAP 1.X requires root and work is ongoing to create a version that does not.
-> Meanwhile, the solution is to allow root to be able to install the Docker ACAP.
+> Docker Compose ACAP 1.3.1 and previous, requires root and work is ongoing to create a version that does not.
+> Meanwhile, the solution is to allow root to be able to install the Docker Compose ACAP.
 >
 > On the web page of the device:
 > 1. Go to the Apps page, toggle on `Allow root-privileged apps`.
