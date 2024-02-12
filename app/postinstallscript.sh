@@ -33,10 +33,6 @@ Wants=network-online.target
 After=user@$_uid.service
 Requires=user@$_uid.service
 [Service]
-Environment=PATH=/bin:/usr/bin:$_appdirectory:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin
-Environment=HOME=$_appdirectory
-Environment=DOCKER_HOST=unix://run/user/$_uid/docker.sock
-Environment=XDG_RUNTIME_DIR=/run/user/$_uid
 ExecStartPre=+$_appdirectory/handle_directories.sh $_uid $_uname $_gname
 EOF
 
