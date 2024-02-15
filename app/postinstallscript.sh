@@ -39,10 +39,6 @@ EOF
 # reload daemon for service file changes to take effect
 systemctl daemon-reload
 
-# Create docker and cli-plugins directory
-mkdir -p /usr/local/bin
-mkdir -p /usr/local/lib/docker/cli-plugins
-
 # *** non-root user should be able to do this ****
 
 # Move the daemon.json file into localdata folder
