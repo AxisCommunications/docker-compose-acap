@@ -5,14 +5,6 @@ if [ "$(id -un)" != "root" ]; then
     exit 77 # EX_NOPERM
 fi
 
-# Remove docker symbolic link
-rm /usr/local/bin/docker
-
-# Remove docker-compose symbolic link
-rm /usr/local/lib/docker/cli-plugins/docker-compose
-
-rm /var/run/docker.sock
-
 # *** root user required ****
 # TODO Add a check of who the user is and log warning if not root
 
