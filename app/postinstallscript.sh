@@ -32,8 +32,6 @@ After=network-online.target containerd.service var-spool-storage-SD_DISK.mount
 Wants=network-online.target
 After=user@$_uid.service
 Requires=user@$_uid.service
-[Service]
-ExecStartPre=+$_appdirectory/handle_directories.sh $_uid $_uname $_gname
 EOF
 
 # reload daemon for service file changes to take effect
