@@ -104,9 +104,6 @@ COPY app /opt/app
 COPY --from=ps /export/ps /opt/app
 COPY --from=nsenter /export/nsenter /opt/app
 
-# Temp fix to remove 'root' directories
-COPY ./binaries/handle_directories.sh /opt/app
-
 WORKDIR /opt/app
 
 # Download and extract slirp4netns
@@ -153,8 +150,7 @@ RUN <<EOF
         -a slirp4netns \
         -a rootlesskit \
         -a rootlesskit-docker-proxy \
-        -a nsenter \
-        -a handle_directories.sh
+        -a nsenter
 EOF
 
 ENTRYPOINT [ "/opt/axis/acapsdk/sysroots/x86_64-pokysdk-linux/usr/bin/eap-install.sh" ]
