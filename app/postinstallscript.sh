@@ -37,17 +37,6 @@ EOF
 # reload daemon for service file changes to take effect
 systemctl daemon-reload
 
-# Create docker symbolic link
-mkdir -p /usr/local/bin
-ln -s /usr/local/packages/dockerdwrapperwithcompose/docker /usr/local/bin/docker
-
-# Create docker-compose symbolic link
-mkdir -p /usr/local/lib/docker/cli-plugins
-ln -s /usr/local/packages/dockerdwrapperwithcompose/docker-compose /usr/local/lib/docker/cli-plugins/docker-compose
-
-# Create docker socket symbolic link
-ln -s /var/run/user/"$_uid"/docker.sock /var/run/docker.sock
-
 # *** non-root user should be able to do this ****
 
 # Move the daemon.json file into localdata folder
