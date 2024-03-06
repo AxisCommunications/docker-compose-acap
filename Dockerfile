@@ -150,7 +150,8 @@ RUN <<EOF
         -a slirp4netns \
         -a rootlesskit \
         -a rootlesskit-docker-proxy \
-        -a nsenter
+        -a nsenter \
+        --disable-manifest-validation
 EOF
 
 ENTRYPOINT [ "/opt/axis/acapsdk/sysroots/x86_64-pokysdk-linux/usr/bin/eap-install.sh" ]
