@@ -250,13 +250,15 @@ start_dockerd(void)
   char *use_sd_card_value = get_parameter_value("SDCardSupport");
   char *use_tls_value = get_parameter_value("UseTLS");
   char *use_ipc_socket_value = get_parameter_value("IPCSocket");
+  char *use_tcp_socket_value = get_parameter_value("TCPSocket");
   if (use_sd_card_value == NULL || use_tls_value == NULL ||
-      use_ipc_socket_value == NULL) {
+      use_ipc_socket_value == NULL || use_tcp_socket_value == NULL) {
     goto end;
   }
   bool use_sdcard = strcmp(use_sd_card_value, "yes") == 0;
   bool use_tls = strcmp(use_tls_value, "yes") == 0;
   bool use_ipc_socket = strcmp(use_ipc_socket_value, "yes") == 0;
+  bool use_tcp_socket = strcmp(use_tcp_socket_value, "yes") == 0;
 
   if (use_sdcard) {
     // Confirm that the SD card is usable
@@ -326,27 +328,48 @@ start_dockerd(void)
       goto end;
     }
 
-    args_offset += g_snprintf(args + args_offset,
-                              args_len - args_offset,
-                              " %s %s %s %s %s %s %s %s",
-                              "-H tcp://0.0.0.0:2376",
-                              "--tlsverify",
-                              "--tlscacert",
-                              ca_path,
-                              "--tlscert",
-                              cert_path,
-                              "--tlskey",
-                              key_path);
+    if (use_tcp_socket) {
+      args_offset += g_snprintf(args + args_offset,
+                                args_len - args_offset,
+                                " %s %s %s %s %s %s %s %s",
+                                "-H tcp://0.0.0.0:2376",
+                                "--tlsverify",
+                                "--tlscacert",
+                                ca_path,
+                                "--tlscert",
+                                cert_path,
+                                "--tlskey",
+                                key_path);
 
-    g_strlcat(msg, " in TLS mode", msg_len);
-  } else {
+      g_strlcat(msg, " in TLS mode with TCP socket", msg_len);
+    } else {
+      args_offset += g_snprintf(args + args_offset,
+                                args_len - args_offset,
+                                " %s %s %s %s %s %s %s",
+                                "--tlsverify",
+                                "--tlscacert",
+                                ca_path,
+                                "--tlscert",
+                                cert_path,
+                                "--tlskey",
+                                key_path);
+
+      g_strlcat(msg, " in TLS mode without TCP socket", msg_len);
+    }
+  } else if (!use_tls && use_tcp_socket) {
     args_offset += g_snprintf(args + args_offset,
                               args_len - args_offset,
                               " %s %s",
                               "-H tcp://0.0.0.0:2375",
                               "--tls=false");
 
-    g_strlcat(msg, " in unsecured mode", msg_len);
+    g_strlcat(msg, " in unsecured mode with TCP socket", msg_len);
+  } else {
+    // Without TLS and without TCP socket
+    args_offset += g_snprintf(
+        args + args_offset, args_len - args_offset, " %s", "--tls=false");
+
+    g_strlcat(msg, " in unsecured mode without TCP socket", msg_len);
   }
 
   if (use_sdcard) {
@@ -409,6 +432,7 @@ end:
   free(use_sd_card_value);
   free(use_tls_value);
   free(use_ipc_socket_value);
+  free(use_tcp_socket_value);
   g_clear_error(&error);
 
   return return_value;
