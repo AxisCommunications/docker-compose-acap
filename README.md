@@ -42,6 +42,7 @@ this is the recommended way to install this ACAP.
 > Meanwhile, the solution is to allow root to be able to install the Docker Compose ACAP.
 >
 > On the web page of the device:
+>
 > 1. Go to the Apps page, toggle on `Allow root-privileged apps`.
 > 1. Go to System -> Account page, under SSH accounts toggle off `Restrict root access` to be able to send the TLS certificates. Make sure to set the password of the `root` SSH user.
 
@@ -76,12 +77,13 @@ It's also possible to build and use a locally built image. See the
 
 ## Securing the Docker Compose ACAP using TLS
 
-The Docker Compose ACAP can be run either unsecured or in TLS mode. The Docker Compose ACAP uses
-TLS as default. Use the "Use TLS" dropdown in the web interface to switch
-between the two different modes. It's also possible to toggle this option by
-calling the parameter management API in [VAPIX](https://www.axis.com/vapix-library/) and setting the
-`root.dockerdwrapperwithcompose.UseTLS` parameter to `yes` or `no`. The following commands would
-enable TLS:
+The Docker Compose ACAP can be run either unsecured mode or in TLS mode with or without TCP socket.
+The Docker Compose ACAP use unsecured mode without TCP socket creation as default. Use the "Use TLS"
+and "TCP Socket" dropdowns in the web interface to switch between the two different modes(yes/no). It's
+also possible to toggle this option by calling the parameter management API in
+[VAPIX](https://www.axis.com/vapix-library/) and setting the `root.dockerdwrapperwithcompose.UseTLS`
+parameter to `yes` or `no` and `root.dockerdwrapperwithcompose.TCPSocket` parameter to `yes` or `no`.
+The following commands would enable TLS:
 
 ```sh
 DEVICE_IP=<device ip>
@@ -89,6 +91,13 @@ DEVICE_PASSWORD='<password>'
 
 curl -s --anyauth -u "root:$DEVICE_PASSWORD" \
   "http://$DEVICE_IP/axis-cgi/param.cgi?action=update&root.dockerdwrapperwithcompose.UseTLS=yes"
+```
+
+The following command would enable TCP Socket:
+
+```sh
+curl -s --anyauth -u "root:$DEVICE_PASSWORD" \
+  "http://$DEVICE_IP/axis-cgi/param.cgi?action=update&root.dockerdwrapperwithcompose.TCPSocket=yes"
 ```
 
 Note that the dockerd service will be restarted every time TLS is activated or
