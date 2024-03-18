@@ -78,7 +78,8 @@ It's also possible to build and use a locally built image. See the
 ## Securing the Docker Compose ACAP using TLS
 
 The Docker Compose ACAP can be run either unsecured mode or in TLS mode with or without TCP socket.
-The Docker Compose ACAP use unsecured mode without TCP socket creation as default. Use the "Use TLS"
+The Docker Compose ACAP use unsecured mode without TCP socket creation as default. There is an option
+to create TCP socket, if you need to access the Docker daemon remotely. Use the "Use TLS"
 and "TCP Socket" dropdowns in the web interface to switch between the two different modes(yes/no). It's
 also possible to toggle this option by calling the parameter management API in
 [VAPIX](https://www.axis.com/vapix-library/) and setting the `root.dockerdwrapperwithcompose.UseTLS`
@@ -235,9 +236,18 @@ more information.
 Below is an example of how to remotely run a docker command on an Axis device running
 the Docker Compose ACAP in unsecured mode:
 
+With TCP Socket:
+
 ```sh
 DOCKER_INSECURE_PORT=2375
 docker -H=<device ip>:$DOCKER_INSECURE_PORT version
+```
+
+Below is an example of how to remotely run a docker command on an Axis device running
+the Docker Compose ACAP in unsecured mode with IPC socket:
+
+```sh
+docker -H unix:///var/run/docker.sock  version
 ```
 
 See [Client key and certificate](#client-key-and-certificate) for an example
