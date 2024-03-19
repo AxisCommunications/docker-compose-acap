@@ -296,7 +296,7 @@ start_dockerd(void)
 
   g_strlcpy(msg, "Starting dockerd", msg_len);
 
-  if (use_tls) {
+  if (use_tcp_socket && use_tls) {
     const char *ca_path =
         "/usr/local/packages/dockerdwrapperwithcompose/ca.pem";
     const char *cert_path =
@@ -328,35 +328,21 @@ start_dockerd(void)
       goto end;
     }
 
-    if (use_tcp_socket) {
-      args_offset += g_snprintf(args + args_offset,
-                                args_len - args_offset,
-                                " %s %s %s %s %s %s %s %s",
-                                "-H tcp://0.0.0.0:2376",
-                                "--tlsverify",
-                                "--tlscacert",
-                                ca_path,
-                                "--tlscert",
-                                cert_path,
-                                "--tlskey",
-                                key_path);
+    args_offset += g_snprintf(args + args_offset,
+                              args_len - args_offset,
+                              " %s %s %s %s %s %s %s %s",
+                              "-H tcp://0.0.0.0:2376",
+                              "--tlsverify",
+                              "--tlscacert",
+                              ca_path,
+                              "--tlscert",
+                              cert_path,
+                              "--tlskey",
+                              key_path);
 
-      g_strlcat(msg, " in TLS mode with TCP socket", msg_len);
-    } else {
-      args_offset += g_snprintf(args + args_offset,
-                                args_len - args_offset,
-                                " %s %s %s %s %s %s %s",
-                                "--tlsverify",
-                                "--tlscacert",
-                                ca_path,
-                                "--tlscert",
-                                cert_path,
-                                "--tlskey",
-                                key_path);
+    g_strlcat(msg, " in TLS mode with TCP socket", msg_len);
 
-      g_strlcat(msg, " in TLS mode without TCP socket", msg_len);
-    }
-  } else if (!use_tls && use_tcp_socket) {
+  } else if (use_tcp_socket && !use_tls) {
     args_offset += g_snprintf(args + args_offset,
                               args_len - args_offset,
                               " %s %s",
@@ -364,12 +350,9 @@ start_dockerd(void)
                               "--tls=false");
 
     g_strlcat(msg, " in unsecured mode with TCP socket", msg_len);
-  } else {
-    // Without TLS and without TCP socket
-    args_offset += g_snprintf(
-        args + args_offset, args_len - args_offset, " %s", "--tls=false");
-
-    g_strlcat(msg, " in unsecured mode without TCP socket", msg_len);
+  } else if (!use_tcp_socket && use_tls) {
+    syslog(LOG_WARNING, "Set UseTLS as 'no' when TCP socket is set as 'no'.");
+    goto end;
   }
 
   if (use_sdcard) {
@@ -392,6 +375,7 @@ start_dockerd(void)
 
     g_strlcat(msg, " with IPC socket.", msg_len);
   } else {
+    // By default, API listens on IPC socket even if it's set to 'no'
     g_strlcat(msg, " without IPC socket.", msg_len);
   }
 
@@ -537,6 +521,12 @@ parameter_changed_callback(const gchar *name,
     restart_dockerd = true;
   } else if (strcmp(parname, "UseTLS") == 0) {
     syslog(LOG_INFO, "UseTLS changed to: %s", value);
+    restart_dockerd = true;
+  } else if (strcmp(parname, "TCPSocket") == 0) {
+    syslog(LOG_INFO, "TCPSocket changed to: %s", value);
+    restart_dockerd = true;
+  } else if (strcmp(parname, "IPCSocket") == 0) {
+    syslog(LOG_INFO, "IPCSocket changed to: %s", value);
     restart_dockerd = true;
   } else {
     syslog(LOG_WARNING, "Parameter %s is not recognized", name);

@@ -77,28 +77,43 @@ It's also possible to build and use a locally built image. See the
 
 ## Securing the Docker Compose ACAP using TLS
 
-The Docker Compose ACAP can be run either unsecured mode or in TLS mode with or without TCP socket.
-The Docker Compose ACAP use unsecured mode without TCP socket creation as default. There is an option
-to create TCP socket, if you need to access the Docker daemon remotely. Use the "Use TLS"
-and "TCP Socket" dropdowns in the web interface to switch between the two different modes(yes/no). It's
-also possible to toggle this option by calling the parameter management API in
-[VAPIX](https://www.axis.com/vapix-library/) and setting the `root.dockerdwrapperwithcompose.UseTLS`
-parameter to `yes` or `no` and `root.dockerdwrapperwithcompose.TCPSocket` parameter to `yes` or `no`.
-The following commands would enable TLS:
+The Docker Compose ACAP can be run in either TLS mode or unsecured mode. The Docker Compose ACAP
+uses unsecured mode by default. There is an option to choose between "TCPSocket" and "IPCSocket" socket
+parameters. The API listens to IPC socket by default, even if the "IPCSocket" parameter is set to 'no'.
+The TLS mode can be used with a TCP socket, as well as with or without an IPC socket. When the parameter
+"TCPSocket" is set to 'no', the parameter "UseTLS" will also be set to 'no'.
+
+Use the "Use TLS", "TCP Socket" and "IPC Socket" dropdowns in the web interface to switch between the
+two different modes(yes/no). Whenever these settings change, the Docker daemon will automatically restart.
+It's also possible to toggle this option by calling the parameter management API in [VAPIX](https://www.axis.com/vapix-library/)
+and setting `root.dockerdwrapperwithcompose.UseTLS`, `root.dockerdwrapperwithcompose.TCPSocket` and
+`root.dockerdwrapperwithcompose.IPCSocket` parameters to `yes` or `no`. The following commands would
+enable those parameters:
 
 ```sh
 DEVICE_IP=<device ip>
 DEVICE_PASSWORD='<password>'
+```
 
+Enable TLS:
+
+```sh
 curl -s --anyauth -u "root:$DEVICE_PASSWORD" \
   "http://$DEVICE_IP/axis-cgi/param.cgi?action=update&root.dockerdwrapperwithcompose.UseTLS=yes"
 ```
 
-The following command would enable TCP Socket:
+Enable TCP Socket:
 
 ```sh
 curl -s --anyauth -u "root:$DEVICE_PASSWORD" \
   "http://$DEVICE_IP/axis-cgi/param.cgi?action=update&root.dockerdwrapperwithcompose.TCPSocket=yes"
+```
+
+Enable IPC Socket:
+
+```sh
+curl -s --anyauth -u "root:$DEVICE_PASSWORD" \
+  "http://$DEVICE_IP/axis-cgi/param.cgi?action=update&root.dockerdwrapperwithcompose.IPCSocket=yes"
 ```
 
 Note that the dockerd service will be restarted every time TLS is activated or
@@ -234,7 +249,7 @@ port 2376 when running secured using TLS. Please read section
 [Securing the Docker Compose ACAP using TLS](#securing-the-docker-compose-acap-using-tls) for
 more information.
 Below is an example of how to remotely run a docker command on an Axis device running
-the Docker Compose ACAP in unsecured mode:
+the Docker Compose ACAP in unsecured mode with TCP socket:
 
 With TCP Socket:
 
@@ -242,6 +257,8 @@ With TCP Socket:
 DOCKER_INSECURE_PORT=2375
 docker -H=<device ip>:$DOCKER_INSECURE_PORT version
 ```
+
+With IPC Socket:
 
 Below is an example of how to remotely run a docker command on an Axis device running
 the Docker Compose ACAP in unsecured mode with IPC socket:
