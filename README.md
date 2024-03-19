@@ -79,9 +79,8 @@ It's also possible to build and use a locally built image. See the
 
 The Docker Compose ACAP can be run in either TLS mode or unsecured mode. The Docker Compose ACAP
 uses unsecured mode by default. There is an option to choose between "TCPSocket" and "IPCSocket" socket
-parameters. The API listens to IPC socket by default, even if the "IPCSocket" parameter is set to 'no'.
-The TLS mode can be used with a TCP socket, as well as with or without an IPC socket. When the parameter
-"TCPSocket" is set to 'no', the parameter "UseTLS" will also be set to 'no'.
+parameters. The TLS mode can be used with a TCP socket, as well as with or without an IPC socket. When
+the parameter "TCPSocket" is set to 'no', the parameter "UseTLS" will also be set to 'no'.
 
 Use the "Use TLS", "TCP Socket" and "IPC Socket" dropdowns in the web interface to switch between the
 two different modes(yes/no). Whenever these settings change, the Docker daemon will automatically restart.
@@ -249,22 +248,11 @@ port 2376 when running secured using TLS. Please read section
 [Securing the Docker Compose ACAP using TLS](#securing-the-docker-compose-acap-using-tls) for
 more information.
 Below is an example of how to remotely run a docker command on an Axis device running
-the Docker Compose ACAP in unsecured mode with TCP socket:
-
-With TCP Socket:
+the Docker Compose ACAP in unsecured mode:
 
 ```sh
 DOCKER_INSECURE_PORT=2375
 docker -H=<device ip>:$DOCKER_INSECURE_PORT version
-```
-
-With IPC Socket:
-
-Below is an example of how to remotely run a docker command on an Axis device running
-the Docker Compose ACAP in unsecured mode with IPC socket:
-
-```sh
-docker -H unix:///var/run/docker.sock  version
 ```
 
 See [Client key and certificate](#client-key-and-certificate) for an example
