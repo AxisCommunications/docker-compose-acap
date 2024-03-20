@@ -48,6 +48,16 @@ static const char *sd_card_path = "/var/spool/storage/SD_DISK";
 // True if the dockerd_exited_callback should restart dockerd
 static bool restart_dockerd = false;
 
+// All ax_parameters the acap has
+static const char *ax_parameters[] = {"IPCSocket", "SDCardSupport", "UseTLS"};
+
+static const char *tls_cert_path =
+    "/usr/local/packages/dockerdwrapperwithcompose/";
+
+static const char *tls_certs[] = {"ca.pem",
+                                  "server-cert.pem",
+                                  "server-key.pem"};
+
 /**
  * @brief Signals handling
  *
@@ -227,12 +237,160 @@ end:
 }
 
 /**
+ * @brief Gets and verifies the SDCardSupport selection
+ *
+ * @param use_sdcard_ret selection to be updated.
+ * @return True if successful, false otherwise.
+ */
+static gboolean
+get_and_verify_sd_card_selection(bool *use_sdcard_ret)
+{
+  gboolean return_value = false;
+  bool use_sdcard = *use_sdcard_ret;
+  char *use_sd_card_value = get_parameter_value("SDCardSupport");
+  char *sd_file_system = NULL;
+
+  if (use_sd_card_value != NULL) {
+    bool use_sdcard = strcmp(use_sd_card_value, "yes") == 0;
+    if (use_sdcard) {
+      // Confirm that the SD card is usable
+      sd_file_system = get_sd_filesystem();
+      if (sd_file_system == NULL) {
+        syslog(LOG_ERR,
+               "Couldn't identify the file system of the SD card at %s",
+               sd_card_path);
+        goto end;
+      }
+
+      if (strcmp(sd_file_system, "vfat") == 0 ||
+          strcmp(sd_file_system, "exfat") == 0) {
+        syslog(LOG_ERR,
+               "The SD card at %s uses file system %s which does not support "
+               "Unix file permissions. Please reformat to a file system that "
+               "support Unix file permissions, such as ext4 or xfs.",
+               sd_card_path,
+               sd_file_system);
+        goto end;
+      }
+
+      gchar card_path[100];
+      g_stpcpy(card_path, sd_card_path);
+      g_strlcat(card_path, "/dockerd", 100);
+
+      if (access(card_path, F_OK) == 0 && access(card_path, W_OK) != 0) {
+        syslog(
+            LOG_ERR,
+            "The application user does not have write permissions to the SD "
+            "card directory at %s. Please change the directory permissions or "
+            "remove the directory.",
+            card_path);
+        goto end;
+      }
+
+      if (!setup_sdcard()) {
+        syslog(LOG_ERR, "Failed to setup SD card.");
+        goto end;
+      }
+    }
+    *use_sdcard_ret = use_sdcard;
+    return_value = true;
+  }
+end:
+  free(use_sd_card_value);
+  free(sd_file_system);
+  return return_value;
+}
+
+/**
+ * @brief Gets and verifies the UseTLS selection
+ *
+ * @param use_tls_ret selection to be updated.
+ * @return True if successful, false otherwise.
+ */
+static gboolean
+get_and_verify_tls_selection(bool *use_tls_ret)
+{
+  gboolean return_value = false;
+  bool use_tls = *use_tls_ret;
+  char *ca_path = NULL;
+  char *cert_path = NULL;
+  char *key_path = NULL;
+
+  char *use_tls_value = get_parameter_value("UseTLS");
+  if (use_tls_value != NULL) {
+    use_tls = strcmp(use_tls_value, "yes") == 0;
+    if (use_tls) {
+      char *ca_path = g_strdup_printf("%s%s", tls_cert_path, tls_certs[0]);
+      char *cert_path = g_strdup_printf("%s%s", tls_cert_path, tls_certs[1]);
+      char *key_path = g_strdup_printf("%s%s", tls_cert_path, tls_certs[2]);
+
+      bool ca_exists = access(ca_path, F_OK) == 0;
+      bool cert_exists = access(cert_path, F_OK) == 0;
+      bool key_exists = access(key_path, F_OK) == 0;
+
+      if (!ca_exists || !cert_exists || !key_exists) {
+        syslog(LOG_ERR, "One or more TLS certificates missing.");
+      }
+
+      if (!ca_exists) {
+        syslog(LOG_ERR,
+               "Cannot start using TLS, no CA certificate found at %s",
+               ca_path);
+      }
+      if (!cert_exists) {
+        syslog(LOG_ERR,
+               "Cannot start using TLS, no server certificate found at %s",
+               cert_path);
+      }
+      if (!key_exists) {
+        syslog(LOG_ERR,
+               "Cannot start using TLS, no server key found at %s",
+               key_path);
+      }
+
+      if (!ca_exists || !cert_exists || !key_exists) {
+        goto end;
+      }
+    }
+    *use_tls_ret = use_tls;
+    return_value = true;
+  }
+end:
+  free(use_tls_value);
+  free(ca_path);
+  free(cert_path);
+  free(key_path);
+  return return_value;
+}
+
+/**
+ * @brief Gets and verifies the IPCSocket selection
+ *
+ * @param use_ipc_socket_ret selection to be updated.
+ * @return True if successful, false otherwise.
+ */
+static gboolean
+get_ipc_socket_selection(bool *use_ipc_socket_ret)
+{
+  gboolean return_value = false;
+  bool use_ipc_socket = *use_ipc_socket_ret;
+  char *use_ipc_socket_value = get_parameter_value("IPCSocket");
+  if (use_ipc_socket_value != NULL) {
+    use_ipc_socket = strcmp(use_ipc_socket_value, "yes") == 0;
+    *use_ipc_socket_ret = use_ipc_socket;
+    return_value = true;
+  }
+  free(use_ipc_socket_value);
+  return return_value;
+}
+
+/**
  * @brief Start a new dockerd process.
  *
  * @return True if successful, false otherwise
  */
 static bool
-start_dockerd(void)
+start_dockerd(bool use_sdcard, bool use_tls, bool use_ipc_socket)
 {
   GError *error = NULL;
 
@@ -246,44 +404,6 @@ start_dockerd(void)
   guint args_offset = 0;
   gchar **args_split = NULL;
 
-  // Read parameters
-  char *use_sd_card_value = get_parameter_value("SDCardSupport");
-  char *use_tls_value = get_parameter_value("UseTLS");
-  char *use_ipc_socket_value = get_parameter_value("IPCSocket");
-  if (use_sd_card_value == NULL || use_tls_value == NULL ||
-      use_ipc_socket_value == NULL) {
-    goto end;
-  }
-  bool use_sdcard = strcmp(use_sd_card_value, "yes") == 0;
-  bool use_tls = strcmp(use_tls_value, "yes") == 0;
-  bool use_ipc_socket = strcmp(use_ipc_socket_value, "yes") == 0;
-
-  if (use_sdcard) {
-    // Confirm that the SD card is usable
-    char *sd_file_system = get_sd_filesystem();
-    if (sd_file_system == NULL) {
-      syslog(LOG_ERR,
-             "Couldn't identify the file system of the SD card at %s",
-             sd_card_path);
-      goto end;
-    }
-
-    if (strcmp(sd_file_system, "vfat") == 0 ||
-        strcmp(sd_file_system, "exfat") == 0) {
-      syslog(LOG_ERR,
-             "The SD card at %s uses file system %s which does not support "
-             "Unix file permissions. Please reformat to a file system that "
-             "support Unix file permissions, such as ext4 or xfs.",
-             sd_card_path,
-             sd_file_system);
-      goto end;
-    }
-
-    if (!setup_sdcard()) {
-      syslog(LOG_ERR, "Failed to setup SD card.");
-      goto end;
-    }
-  }
   args_offset += g_snprintf(
       args + args_offset,
       args_len - args_offset,
@@ -301,30 +421,6 @@ start_dockerd(void)
         "/usr/local/packages/dockerdwrapperwithcompose/server-cert.pem";
     const char *key_path =
         "/usr/local/packages/dockerdwrapperwithcompose/server-key.pem";
-
-    bool ca_exists = access(ca_path, F_OK) == 0;
-    bool cert_exists = access(cert_path, F_OK) == 0;
-    bool key_exists = access(key_path, F_OK) == 0;
-
-    if (!ca_exists) {
-      syslog(LOG_ERR,
-             "Cannot start using TLS, no CA certificate found at %s",
-             ca_path);
-    }
-    if (!cert_exists) {
-      syslog(LOG_ERR,
-             "Cannot start using TLS, no server certificate found at %s",
-             cert_path);
-    }
-    if (!key_exists) {
-      syslog(LOG_ERR,
-             "Cannot start using TLS, no server key found at %s",
-             key_path);
-    }
-
-    if (!ca_exists || !cert_exists || !key_exists) {
-      goto end;
-    }
 
     args_offset += g_snprintf(args + args_offset,
                               args_len - args_offset,
@@ -401,16 +497,11 @@ start_dockerd(void)
     g_main_loop_quit(loop);
     goto end;
   }
-
   return_value = true;
 
 end:
   g_strfreev(args_split);
-  free(use_sd_card_value);
-  free(use_tls_value);
-  free(use_ipc_socket_value);
   g_clear_error(&error);
-
   return return_value;
 }
 
@@ -483,7 +574,26 @@ dockerd_process_exited_callback(__attribute__((unused)) GPid pid,
 
   if (restart_dockerd) {
     restart_dockerd = false;
-    if (!start_dockerd()) {
+    bool use_sdcard = false;
+    bool use_tls = false;
+    bool use_ipc_socket = false;
+
+    if (!get_and_verify_sd_card_selection(&use_sdcard)) {
+      syslog(LOG_ERR, "Failed to setup sd_card");
+      exit_code = -1;
+      g_main_loop_quit(loop);
+    }
+    if (!get_and_verify_tls_selection(&use_tls)) {
+      syslog(LOG_ERR, "Failed to verify tls selection");
+      exit_code = -1;
+      g_main_loop_quit(loop);
+    }
+    if (!get_ipc_socket_selection(&use_ipc_socket)) {
+      syslog(LOG_ERR, "Failed to get ipc socket selection");
+      exit_code = -1;
+      g_main_loop_quit(loop);
+    }
+    if (!start_dockerd(use_sdcard, use_tls, use_ipc_socket)) {
       syslog(LOG_ERR, "Failed to restart dockerd, exiting.");
       exit_code = -1;
       g_main_loop_quit(loop);
@@ -495,7 +605,7 @@ dockerd_process_exited_callback(__attribute__((unused)) GPid pid,
 }
 
 /**
- * @brief Callback function called when the SDCardSupport parameter
+ * @brief Callback function called when any of the parameters
  * changes. Will restart the dockerd process with the new setting.
  *
  * @param name Name of the updated parameter.
@@ -507,14 +617,18 @@ parameter_changed_callback(const gchar *name,
                            __attribute__((unused)) gpointer data)
 {
   const gchar *parname = name += strlen("root.dockerdwrapperwithcompose.");
-  // bool dockerd_started_correctly = false;
-  if (strcmp(parname, "SDCardSupport") == 0) {
-    syslog(LOG_INFO, "SDCardSupport changed to: %s", value);
-    restart_dockerd = true;
-  } else if (strcmp(parname, "UseTLS") == 0) {
-    syslog(LOG_INFO, "UseTLS changed to: %s", value);
-    restart_dockerd = true;
-  } else {
+
+  bool unknown_parameter = true;
+  for (size_t i = 0; i < sizeof(ax_parameters) / sizeof(ax_parameters[0]);
+       ++i) {
+    if (strcmp(parname, ax_parameters[i]) == 0) {
+      syslog(LOG_INFO, "%s changed to: %s", ax_parameters[i], value);
+      restart_dockerd = true;
+      unknown_parameter = false;
+    }
+  }
+
+  if (unknown_parameter) {
     syslog(LOG_WARNING, "Parameter %s is not recognized", name);
     restart_dockerd = false;
 
@@ -543,34 +657,21 @@ setup_axparameter(void)
     goto end;
   }
 
-  gboolean geresult = ax_parameter_register_callback(
-      ax_parameter,
-      "root.dockerdwrapperwithcompose.SDCardSupport",
-      parameter_changed_callback,
-      NULL,
-      &error);
+  for (size_t i = 0; i < sizeof(ax_parameters) / sizeof(ax_parameters[0]);
+       ++i) {
+    char *parameter_path = g_strdup_printf(
+        "%s.%s", "root.dockerdwrapperwithcompose", ax_parameters[i]);
+    gboolean geresult = ax_parameter_register_callback(
+        ax_parameter, parameter_path, parameter_changed_callback, NULL, &error);
+    free(parameter_path);
 
-  if (geresult == FALSE) {
-    syslog(LOG_ERR,
-           "Could not register SDCardSupport callback. Error: %s",
-           error->message);
-    goto end;
-  }
-
-  geresult =
-      ax_parameter_register_callback(ax_parameter,
-                                     "root.dockerdwrapperwithcompose.UseTLS",
-                                     parameter_changed_callback,
-                                     NULL,
-                                     &error);
-
-  if (geresult == FALSE) {
-    syslog(LOG_ERR,
-           "Could not register UseTLS callback. Error: %s",
-           error->message);
-    ax_parameter_unregister_callback(
-        ax_parameter, "root.dockerdwrapperwithcompose.SDCardSupport");
-    goto end;
+    if (geresult == FALSE) {
+      syslog(LOG_ERR,
+             "Could not register %s callback. Error: %s",
+             ax_parameters[i],
+             error->message);
+      goto end;
+    }
   }
 
   success = true;
@@ -606,7 +707,27 @@ main(void)
   loop = g_main_loop_new(NULL, FALSE);
   loop = g_main_loop_ref(loop);
 
-  if (!start_dockerd()) {
+  bool use_sdcard = false;
+  bool use_tls = false;
+  bool use_ipc_socket = false;
+
+  if (!get_and_verify_sd_card_selection(&use_sdcard)) {
+    syslog(LOG_INFO, "Failed to setup sd_card");
+    exit_code = -1;
+    goto end;
+  }
+  if (!get_and_verify_tls_selection(&use_tls)) {
+    syslog(LOG_INFO, "Failed to verify tls selection");
+    exit_code = -1;
+    goto end;
+  }
+  if (!get_ipc_socket_selection(&use_ipc_socket)) {
+    syslog(LOG_INFO, "Failed to get ipc socket selection");
+    exit_code = -1;
+    goto end;
+  }
+
+  if (!start_dockerd(use_sdcard, use_tls, use_ipc_socket)) {
     syslog(LOG_ERR, "Starting dockerd failed");
     exit_code = -1;
     goto end;
@@ -624,10 +745,13 @@ end:
   }
 
   if (ax_parameter != NULL) {
-    ax_parameter_unregister_callback(
-        ax_parameter, "root.dockerdwrapperwithcompose.SDCardSupport");
-    ax_parameter_unregister_callback(ax_parameter,
-                                     "root.dockerdwrapperwithcompose.UseTLS");
+    for (size_t i = 0; i < sizeof(ax_parameters) / sizeof(ax_parameters[0]);
+         ++i) {
+      char *parameter_path = g_strdup_printf(
+          "%s.%s", "root.dockerdwrapperwithcompose", ax_parameters[i]);
+      ax_parameter_unregister_callback(ax_parameter, parameter_path);
+      free(parameter_path);
+    }
     ax_parameter_free(ax_parameter);
   }
 
