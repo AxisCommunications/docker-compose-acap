@@ -77,10 +77,10 @@ It's also possible to build and use a locally built image. See the
 
 ## Securing the Docker Compose ACAP using TLS
 
-The Docker Compose ACAP can be run in either TLS mode or unsecured mode. The Docker Compose ACAP
-uses unsecured mode by default. There is an option to choose between "TCPSocket" and "IPCSocket" socket
-parameters. The TLS mode can be used with a TCP socket, as well as with or without an IPC socket. When
-the parameter "TCPSocket" is set to 'no', the parameter "UseTLS" will also be set to 'no'.
+The Docker Compose ACAP can be run in either TLS mode or unsecured mode. The Docker Compose ACAP uses
+unsecured mode by default.These modes can be used with or without TCP and IPC sockets.There is an option
+to choose between "TCPSocket" and "IPCSocket" socket parameters. It should be noted that if TCP and IPC
+sockets are not enabled, Dockerd will not start.
 
 Use the "Use TLS", "TCP Socket" and "IPC Socket" dropdowns in the web interface to switch between the
 two different modes(yes/no). Whenever these settings change, the Docker daemon will automatically restart.

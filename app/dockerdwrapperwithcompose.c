@@ -296,7 +296,7 @@ start_dockerd(void)
 
   g_strlcpy(msg, "Starting dockerd", msg_len);
 
-  if (use_tcp_socket && use_tls) {
+  if (use_tls) {
     const char *ca_path =
         "/usr/local/packages/dockerdwrapperwithcompose/ca.pem";
     const char *cert_path =
@@ -327,21 +327,21 @@ start_dockerd(void)
     if (!ca_exists || !cert_exists || !key_exists) {
       goto end;
     }
+    if (use_tcp_socket) {
+      args_offset += g_snprintf(args + args_offset,
+                                args_len - args_offset,
+                                " %s %s %s %s %s %s %s %s",
+                                "-H tcp://0.0.0.0:2376",
+                                "--tlsverify",
+                                "--tlscacert",
+                                ca_path,
+                                "--tlscert",
+                                cert_path,
+                                "--tlskey",
+                                key_path);
 
-    args_offset += g_snprintf(args + args_offset,
-                              args_len - args_offset,
-                              " %s %s %s %s %s %s %s %s",
-                              "-H tcp://0.0.0.0:2376",
-                              "--tlsverify",
-                              "--tlscacert",
-                              ca_path,
-                              "--tlscert",
-                              cert_path,
-                              "--tlskey",
-                              key_path);
-
-    g_strlcat(msg, " in TLS mode with TCP socket", msg_len);
-
+      g_strlcat(msg, " in TLS mode with TCP socket", msg_len);
+    }
   } else if (use_tcp_socket && !use_tls) {
     args_offset += g_snprintf(args + args_offset,
                               args_len - args_offset,
@@ -350,9 +350,6 @@ start_dockerd(void)
                               "--tls=false");
 
     g_strlcat(msg, " in unsecured mode with TCP socket", msg_len);
-  } else if (!use_tcp_socket && use_tls) {
-    syslog(LOG_WARNING, "Set UseTLS as 'no' when TCP socket is set as 'no'.");
-    goto end;
   }
 
   if (use_sdcard) {
@@ -374,6 +371,11 @@ start_dockerd(void)
                               "-H unix:///var/run/docker.sock");
 
     g_strlcat(msg, " with IPC socket.", msg_len);
+  } else if (!use_ipc_socket && !use_tcp_socket) {
+    syslog(LOG_WARNING,
+           "Dockerd fails to start. Either IPC socket or TCP socket should be "
+           "selected.");
+    goto end;
   } else {
     // By default, API listens on IPC socket even if it's set to 'no'
     g_strlcat(msg, " without IPC socket.", msg_len);
