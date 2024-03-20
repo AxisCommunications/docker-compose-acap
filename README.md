@@ -42,6 +42,7 @@ this is the recommended way to install this ACAP.
 > Meanwhile, the solution is to allow root to be able to install the Docker Compose ACAP.
 >
 > On the web page of the device:
+>
 > 1. Go to the Apps page, toggle on `Allow root-privileged apps`.
 > 1. Go to System -> Account page, under SSH accounts toggle off `Restrict root access` to be able to send the TLS certificates. Make sure to set the password of the `root` SSH user.
 
@@ -269,6 +270,14 @@ http://<device ip>/#settings/apps
 Go to your device web page above > Click on the tab **App** in the device GUI >
 Add **(+)** sign and browse to the newly built .eap-file > Click **Install** > Run the application by
 enabling the **Start** switch.
+
+## Contributing
+
+Take a look at the [CONTRIBUTING.md](CONTRIBUTING.md) file.
+
+## License
+
+[Apache 2.0](LICENSE)
 
 <!-- Links to external references -->
 <!-- markdownlint-disable MD034 -->
