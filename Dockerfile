@@ -6,7 +6,7 @@ ARG DOCKER_COMPOSE_VERSION=v2.18.1
 ARG REPO=axisecp
 ARG ACAPARCH=armv7hf
 
-ARG VERSION=1.10
+ARG VERSION=1.3
 ARG UBUNTU_VERSION=22.04
 ARG NATIVE_SDK=acap-native-sdk
 
@@ -40,7 +40,7 @@ RUN git clone --depth 1 -b $PROCPS_VERSION 'https://gitlab.com/procps-ng/procps'
 
 ARG BUILD_CACHE=build.cache
 RUN echo ac_cv_func_realloc_0_nonnull=yes >$BUILD_CACHE \
- && echo ac_cv_func_malloc_0_nonnull=yes >>$BUILD_CACHE
+    && echo ac_cv_func_malloc_0_nonnull=yes >>$BUILD_CACHE
 RUN <<EOF
     . /opt/axis/acapsdk/environment-setup*
     ./autogen.sh
