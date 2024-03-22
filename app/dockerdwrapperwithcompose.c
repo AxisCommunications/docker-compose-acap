@@ -667,6 +667,7 @@ setup_axparameter(void)
 end:
   if (!success && ax_parameter != NULL) {
     ax_parameter_free(ax_parameter);
+    ax_parameter = NULL;
   }
   return ax_parameter;
 }
@@ -674,7 +675,6 @@ end:
 int
 main(void)
 {
-  GError *error = NULL;
   AXParameter *ax_parameter = NULL;
   exit_code = 0;
 
@@ -687,7 +687,7 @@ main(void)
   // Setup ax_parameter
   ax_parameter = setup_axparameter();
   if (ax_parameter == NULL) {
-    syslog(LOG_ERR, "Error in setup_axparameter: %s", error->message);
+    syslog(LOG_ERR, "Error in setup_axparameter");
     exit_code = -1;
     goto end;
   }
@@ -723,6 +723,5 @@ end:
     ax_parameter_free(ax_parameter);
   }
 
-  g_clear_error(&error);
   return exit_code;
 }
