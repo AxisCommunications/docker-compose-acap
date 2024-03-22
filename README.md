@@ -77,17 +77,15 @@ It's also possible to build and use a locally built image. See the
 
 ## Securing the Docker Compose ACAP using TLS
 
-The Docker Compose ACAP can be run in either TLS mode or unsecured mode. The Docker Compose ACAP uses
-unsecured mode by default.These modes can be used with or without TCP and IPC sockets.There is an option
-to choose between "TCPSocket" and "IPCSocket" socket parameters. It should be noted that if TCP and IPC
-sockets are not enabled, Dockerd will not start.
+The Docker Compose ACAP application can be run in either TLS mode or unsecured mode. The Docker Compose
+ACAP application uses TLS mode by default. These modes can be used with or without TCP and IPC sockets.
+It should be noted that if TCP and IPC sockets are not enabled, Dockerd will not start.
 
-Use the "Use TLS", "TCP Socket" and "IPC Socket" dropdowns in the web interface to switch between the
+Use the "Use TLS" and "TCP Socket" dropdowns in the web interface to switch between the
 two different modes(yes/no). Whenever these settings change, the Docker daemon will automatically restart.
 It's also possible to toggle this option by calling the parameter management API in [VAPIX](https://www.axis.com/vapix-library/)
-and setting `root.dockerdwrapperwithcompose.UseTLS`, `root.dockerdwrapperwithcompose.TCPSocket` and
-`root.dockerdwrapperwithcompose.IPCSocket` parameters to `yes` or `no`. The following commands would
-enable those parameters:
+and setting `root.dockerdwrapperwithcompose.UseTLS` and `root.dockerdwrapperwithcompose.TCPSocket` parameters
+to `yes` or `no`. The following commands would enable those parameters:
 
 ```sh
 DEVICE_IP=<device ip>
@@ -106,13 +104,6 @@ Enable TCP Socket:
 ```sh
 curl -s --anyauth -u "root:$DEVICE_PASSWORD" \
   "http://$DEVICE_IP/axis-cgi/param.cgi?action=update&root.dockerdwrapperwithcompose.TCPSocket=yes"
-```
-
-Enable IPC Socket:
-
-```sh
-curl -s --anyauth -u "root:$DEVICE_PASSWORD" \
-  "http://$DEVICE_IP/axis-cgi/param.cgi?action=update&root.dockerdwrapperwithcompose.IPCSocket=yes"
 ```
 
 Note that the dockerd service will be restarted every time TLS is activated or
