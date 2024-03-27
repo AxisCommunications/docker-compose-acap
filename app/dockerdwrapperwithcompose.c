@@ -436,9 +436,7 @@ start_dockerd(void)
   }
 
   if (use_ipc_socket) {
-    // Get uid and gid
     uid_t uid = getuid();
-    // uid_t gid = getgid();
 
     // The socket should reside in the user directory
     // TODO: Ideally we would want to set the group ownership here as well, with
@@ -674,6 +672,9 @@ main(void)
   openlog(NULL, LOG_PID, LOG_USER);
   syslog(LOG_INFO, "Started logging.");
 
+  // Setup signal handling.
+  init_signals();
+
   // Get UID of the current user
   uid_t uid = getuid();
 
@@ -714,8 +715,15 @@ main(void)
   syslog(LOG_INFO, "DOCKER_HOST: %s", docker_host);
   syslog(LOG_INFO, "XDG_RUNTIME_DIR: %s", xdg_runtime_dir);
 
-  // Setup signal handling.
-  init_signals();
+  // Set permission on XDG_RUNTIME_DIR to give group (addon) members read and
+  // execute rights. This is needed for other ACAP applications to be able to
+  // use the IPC socket.
+  if (chmod(xdg_runtime_dir, 0750) != 0) {
+    syslog(LOG_ERR,
+           "Failed to set permissions on runtime directory %s",
+           xdg_runtime_dir);
+    goto end;
+  }
 
   // Setup ax_parameter
   ax_parameter = setup_axparameter();
