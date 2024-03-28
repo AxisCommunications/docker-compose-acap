@@ -29,6 +29,13 @@
 #include <syslog.h>
 #include <unistd.h>
 
+#define syslog_v(...)                                                          \
+  if (g_verbose) {                                                             \
+    syslog(__VA_ARGS__);                                                       \
+  }
+
+static bool g_verbose = true /* TODO: false */ ;
+
 #define APP_NAME "dockerdwrapperwithcompose"
 
 /** @brief APP path in a device */
@@ -242,6 +249,35 @@ end:
 }
 
 /**
+ * @brief Attempt to verify ownership for path with timeout.
+ *
+ * @param path pointer path to verify.
+ * @param uid the user id to verify.
+ * @param gid the group id to verify.
+ * @param secs the maximum time to wait for verification.
+ * @return true if verified, false otherwise
+ */
+static bool
+verify_ownership(char *path, uid_t uid, uid_t gid, uint secs)
+{
+  struct stat path_stat;
+  uint i = 0;
+
+  while (i++ < secs) {
+    sleep(1);
+    if (stat(path, &path_stat) == 0) {
+      syslog_v(LOG_INFO, "verify_ownership: %s exists, %d secs", path, i);
+      return (chown(path, uid, gid) == 0);
+    }
+  }
+  syslog_v(LOG_INFO,
+           "verify_ownership: Failed to stat(%s) after %d secs",
+           path,
+           secs);
+  return false;
+}
+
+/**
  * @brief Start a new dockerd process.
  *
  * @return True if successful, false otherwise
@@ -440,11 +476,11 @@ start_dockerd(void)
     uid_t uid = getuid();
     // uid_t gid = getgid();
 
-    // The socket should reside in the user directory
-    // TODO: Ideally we would want to set the group ownership here as well, with
+    // The socket should reside in the user directory.
+    // Ideally we would want to set the group ownership here as well, with
     // '--group', but this does not work as expected so for now we leave it as
-    // is (default docker) which will lead to the socket group ownership set to
-    // 'addon' and a warning message from dockerd
+    // is (defaults to docker) and change the socket group ownership to 'addon'
+    // after creation.
     args_offset += g_snprintf(args + args_offset,
                               args_len - args_offset,
                               " %s%d%s",
@@ -485,6 +521,23 @@ start_dockerd(void)
     exit_code = -1;
     g_main_loop_quit(loop);
     goto end;
+  } else if (use_ipc_socket) {
+    // Verify the ownership of the created docker.sock
+    gsize sock_path_len = 128;
+    gchar sock_path[sock_path_len];
+    uid_t uid = getuid();
+    uid_t gid = getgid();
+
+    g_snprintf(sock_path, sock_path_len, "/var/run/user/%d/docker.sock", uid);
+
+    if (!verify_ownership(sock_path, uid, gid, 30)) {
+      syslog(LOG_WARNING,
+             "Could not chown path %s, uid %d, gid %d, err: %s",
+             sock_path,
+             uid,
+             gid,
+             strerror(errno));
+    }
   }
 
   return_value = true;
