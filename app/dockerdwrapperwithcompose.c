@@ -34,7 +34,7 @@
     syslog(__VA_ARGS__);                                                       \
   }
 
-static bool g_verbose = true /* TODO: false */ ;
+static bool g_verbose = true /* TODO: false */;
 
 #define APP_NAME "dockerdwrapperwithcompose"
 
