@@ -736,7 +736,7 @@ main(void)
           APP_DIRECTORY);
 
   char docker_host[256];
-  sprintf(docker_host, "unix://run/user/%d/docker.sock", (int)uid);
+  sprintf(docker_host, "unix:///var/run/user/%d/docker.sock", (int)uid);
 
   char xdg_runtime_dir[256];
   sprintf(xdg_runtime_dir, "/run/user/%d", (int)uid);
