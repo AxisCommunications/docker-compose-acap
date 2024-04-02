@@ -1,0 +1,47 @@
+# yamllint disable rule:line-length
+---
+name: Cherry-pick and create PR
+
+# Workflow action that cherry-picks from the main branch on docker-acap
+# and creates a PR.
+
+on: workflow_dispatch
+
+jobs:
+  create-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: create pr of cherry-pick
+        run: |
+          pr_branch="cherrybot-${RANDOM}"
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+
+          git switch -c $pr_branch
+          git remote add other $OTHER_REPO_FULL.git -f --no-tags -t main -m main
+
+          commit_hash="$(git rev-parse refs/remotes/other/HEAD)"
+          git cherry-pick $commit_hash --strategy-option theirs
+
+          remote_pr_id=$(gawk 'match($0, /\(#([0-9]+)\)$/, ary) {print ary[1]}' <<< $(git show -s --format=%s))
+          trimmed_commit_msg="$(sed -E '1 s/ \(#[0-9]+\)$//' <<< $(git show -s --format=%B))"
+          git commit --amend -m "$trimmed_commit_msg" 
+
+          title_txt="$(git show -s --format=%s)"
+          echo "title text is $title_txt"
+
+          remote_pr_body="$(gh pr view $remote_pr_id --repo $OTHER_REPO_FULL.git --json body --jq '.body')"  
+          body_text="This is an automatic cherry-pick of [$commit_hash]($OTHER_REPO_FULL/commit/$commit_hash)
+
+          The original PR was [#$remote_pr_id]($OTHER_REPO_FULL/pull/$remote_pr_id) with message:
+
+          $remote_pr_body"
+          echo "body text is $body_text"
+
+          git push --set-upstream origin $pr_branch
+          gh pr create --title "$title_txt" --body "$body_text" --base main --repo $THIS_REPO
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          THIS_REPO: "AxisCommunications/docker-compose-acap"
+          OTHER_REPO_FULL: "https://github.com/AxisCommunications/docker-acap"
