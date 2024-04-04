@@ -22,13 +22,17 @@ jobs:
           git remote add other $OTHER_REPO_FULL.git -f --no-tags -t main -m main
 
           commit_hash="$(git rev-parse refs/remotes/other/HEAD)"
-          git cherry-pick $commit_hash
+          title_prefix=
+          if ! git cherry-pick $commit_hash; then
+              title_prefix="CHERRY-PICK CONFLICT "
+              git cherry-pick $commit_hash --strategy-option theirs
+          fi
 
           remote_pr_id=$(gawk 'match($0, /\(#([0-9]+)\)$/, ary) {print ary[1]}' <<< $(git show -s --format=%s))
           trimmed_commit_msg="$(sed -E '1 s/ \(#[0-9]+\)$//' <<< $(git show -s --format=%B))"
           git commit --amend -m "$trimmed_commit_msg" 
 
-          title_txt="$(git show -s --format=%s)"
+          title_txt="$title_prefix$(git show -s --format=%s)"
           echo "title text is $title_txt"
 
           remote_pr_body="$(gh pr view $remote_pr_id --repo $OTHER_REPO_FULL.git --json body --jq '.body')"  
