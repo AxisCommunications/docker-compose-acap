@@ -22,7 +22,7 @@ jobs:
           git remote add other $OTHER_REPO_FULL.git -f --no-tags -t main -m main
 
           commit_hash="$(git rev-parse refs/remotes/other/HEAD)"
-          git cherry-pick $commit_hash --strategy-option theirs
+          git cherry-pick $commit_hash
 
           remote_pr_id=$(gawk 'match($0, /\(#([0-9]+)\)$/, ary) {print ary[1]}' <<< $(git show -s --format=%s))
           trimmed_commit_msg="$(sed -E '1 s/ \(#[0-9]+\)$//' <<< $(git show -s --format=%B))"
