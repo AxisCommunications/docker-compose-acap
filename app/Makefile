@@ -8,7 +8,8 @@ LDLIBS += $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) pkg-config --libs $(PKGS))
 
 FLAGS += -W -Wformat=2 -Wpointer-arith -Wbad-function-cast -Wstrict-prototypes \
 		-Wmissing-prototypes -Winline -Wdisabled-optimization -Wfloat-equal -Wall -Werror \
-		-Wno-unused-variable
+		-Wno-unused-variable \
+		-D APP_NAME=\"$(PROG1)\"
 
 all:	$(PROG1)
 
