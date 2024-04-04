@@ -24,8 +24,9 @@ jobs:
           commit_hash="$(git rev-parse refs/remotes/other/HEAD)"
           title_prefix=
           if ! git cherry-pick $commit_hash; then
-              title_prefix="CHERRY-PICK CONFLICT "
-              git cherry-pick $commit_hash --strategy-option theirs
+            git cherry-pick --abort
+            title_prefix="CHERRY-PICK CONFLICT "
+            git cherry-pick $commit_hash --strategy-option theirs
           fi
 
           remote_pr_id=$(gawk 'match($0, /\(#([0-9]+)\)$/, ary) {print ary[1]}' <<< $(git show -s --format=%s))
