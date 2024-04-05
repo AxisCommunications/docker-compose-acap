@@ -2,9 +2,9 @@
     "schemaVersion": "1.3",
     "acapPackageConf": {
         "setup": {
-            "friendlyName": "Docker Daemon",
-            "appId": "414120",
-            "appName": "dockerdwrapper",
+            "friendlyName": "Docker Daemon with Compose",
+            "appId": "414150",
+            "appName": "dockerdwrapperwithcompose",
             "vendor": "Axis Communications",
             "embeddedSdkVersion": "3.0",
             "user": {
@@ -17,6 +17,9 @@
         },
         "installation": {
             "postInstallScript": "postinstallscript.sh"
+        },
+        "uninstallation": {
+            "preUninstallScript": "preuninstallscript.sh"
         },
         "configuration": {
             "paramConfig": [
@@ -37,7 +40,7 @@
                 },
                 {
                     "name": "IPCSocket",
-                    "default": "no",
+                    "default": "yes",
                     "type": "bool:no,yes"
                 }
             ]
