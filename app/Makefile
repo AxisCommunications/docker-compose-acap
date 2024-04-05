@@ -1,4 +1,4 @@
-PROG1	= dockerdwrapper
+PROG1	= dockerdwrapperwithcompose
 OBJS1	= $(PROG1).o log.o sd_disk_storage.o
 
 PKGS = gio-2.0 glib-2.0 axparameter axstorage
