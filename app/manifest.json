@@ -42,6 +42,16 @@
                     "name": "IPCSocket",
                     "default": "yes",
                     "type": "bool:no,yes"
+                },
+                {
+                    "name": "ApplicationLogLevel",
+                    "default": "info",
+                    "type": "enum:debug,info"
+                },
+                {
+                    "name": "DockerdLogLevel",
+                    "default": "info",
+                    "type": "enum:debug,info,warn,error,fatal"
                 }
             ]
         }
