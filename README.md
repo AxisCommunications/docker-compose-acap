@@ -263,7 +263,7 @@ The value can be read with a call to the VAPIX param.cgi API, e.g. by using curl
 
 ```sh
 curl --anyauth -u <user:user password> \
-  'http://<device ip>/axis-cgi/param.cgi?action=list&group=root.DockerdWrapper.Status'
+  'http://<device ip>/axis-cgi/param.cgi?action=list&group=root.Dockerdwrapperwithcompose.Status'
 ```
 
 Following are the possible values of `Status`:
@@ -290,7 +290,7 @@ Following are the possible values of `Status`:
                               SD Card.
 ```
 
-## Building the Docker ACAP
+## Building the Docker Compose ACAP
 
 To build the Docker Compose ACAP use docker buildx with the provided Dockerfile:
 
