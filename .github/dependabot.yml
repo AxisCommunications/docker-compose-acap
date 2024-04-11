@@ -28,3 +28,9 @@ updates:
     schedule:
       interval: "weekly"
       day: "monday"
+  # Check status of Dockerfile
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
