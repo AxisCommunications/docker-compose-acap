@@ -122,26 +122,26 @@ achieve this, for example by using `scp` to copy the files from a remote machine
 This can be done by running the following command on the remote machine:
 
 ```sh
-scp ca.pem server-cert.pem server-key.pem root@<device ip>:/usr/local/packages/dockerdwrapperwithcompose/
+scp ca.pem server-cert.pem server-key.pem root@<device ip>:/usr/local/packages/dockerdwrapper/localdata/
 ```
 
 #### The Certificate Authority (CA) certificate
 
 This certificate needs to be present in the dockerdwrapperwithcompose package folder on the
 Axis device and be named `ca.pem`. The full path of the file should be
-`/usr/local/packages/dockerdwrapperwithcompose/ca.pem`.
+`/usr/local/packages/dockerdwrapper/localdata/ca.pem`.
 
 #### The server certificate
 
 This certificate needs to be present in the dockerdwrapperwithcompose package folder on the
 Axis device and be named `server-cert.pem`. The full path of the file should be
-`/usr/local/packages/dockerdwrapperwithcompose/server-cert.pem`.
+`/usr/local/packages/dockerdwrapper/localdata/server-cert.pem`.
 
 #### The private server key
 
 This key needs to be present in the dockerdwrapperwithcompose package folder on the Axis device
 and be named `server-key.pem`. The full path of the file should be
-`/usr/local/packages/dockerdwrapperwithcompose/server-key.pem`.
+`/usr/local/packages/dockerdwrapper/localdata/server-key.pem`.
 
 #### Client key and certificate
 
