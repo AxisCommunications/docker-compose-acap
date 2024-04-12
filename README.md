@@ -8,8 +8,10 @@ on the Axis device.
 
 ### Device
 
-The Docker Compose ACAP requires a container capable device. You may check the compatibility of your
-device by running:
+Minimum Axis OS version 11.9.
+
+The Docker ACAP requires a container capable device. You may check the compatibility of your device
+by running:
 
 ```sh
 DEVICE_IP=<device ip>
