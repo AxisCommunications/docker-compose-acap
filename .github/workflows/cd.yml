@@ -48,7 +48,7 @@ jobs:
           strip_sha=${sha:0:7}
           echo "SHORT_SHA=${strip_sha}" >> $GITHUB_ENV
       - uses: actions/cache@v4
-        if: ${{ (github.ref_type == 'tag') || (github.event_name == 'push' && github.ref == 'refs/heads/main') }}
+        #if: ${{ (github.ref_type == 'tag') || (github.event_name == 'push' && github.ref == 'refs/heads/main') }}
         with:
           path: ${{ github.workspace }}/build-${{ matrix.arch }}
           key: key-${{ env.SHORT_SHA }}-${{ matrix.arch }}
@@ -87,7 +87,7 @@ jobs:
           outputs: "type=local,dest=build"
       - name: Get name of EAP-file
         id: get_eap_file_name
-        if: ${{ (github.ref_type == 'tag') || (github.event_name == 'push' && github.ref == 'refs/heads/main') }}
+        #if: ${{ (github.ref_type == 'tag') || (github.event_name == 'push' && github.ref == 'refs/heads/main') }}
         run: |
           export EAP_FILE=$(find build -type f -name "*.eap" -printf "%f\n")
           delimiter="$(openssl rand -hex 8)"
@@ -95,14 +95,14 @@ jobs:
           echo "${EAP_FILE}" >> ${GITHUB_ENV}
           echo "${delimiter}" >> ${GITHUB_ENV}
       - name: Add sha to EAP-file name
-        if: ${{ (github.ref_type == 'tag') || (github.event_name == 'push' && github.ref == 'refs/heads/main') }}
+        #if: ${{ (github.ref_type == 'tag') || (github.event_name == 'push' && github.ref == 'refs/heads/main') }}
         run: |
           eap_file_w_sha=$(echo $"${{ env.EAP_FILE }}" | sed 's/\.eap/_${{ env.SHORT_SHA }}.eap/')
           echo "EAP_FILE_W_SHA=${eap_file_w_sha}" >> $GITHUB_ENV
           cp build/${{ env.EAP_FILE }} build/$eap_file_w_sha
       - name: Save full file name
         id: save_full_file_name
-        if: ${{ (github.ref_type == 'tag') || (github.event_name == 'push' && github.ref == 'refs/heads/main') }}
+        #if: ${{ (github.ref_type == 'tag') || (github.event_name == 'push' && github.ref == 'refs/heads/main') }}
         run: |
           echo "SHORT_SHA=${{ env.SHORT_SHA }}" >> $GITHUB_OUTPUT
           if [ ${{ matrix.arch }} = armv7hf ]
@@ -115,7 +115,7 @@ jobs:
             echo "::error::Non valid architecture '${{ matrix.arch }}' encountered"
           fi
       - name: Move EAP-file to cache location
-        if: ${{ (github.ref_type == 'tag') || (github.event_name == 'push' && github.ref == 'refs/heads/main') }}
+        #if: ${{ (github.ref_type == 'tag') || (github.event_name == 'push' && github.ref == 'refs/heads/main') }}
         run: |
           mkdir -p ${{ github.workspace }}/build-${{ matrix.arch }}
           #rm -f ${{ github.workspace }}/build-${{ matrix.arch }}/${{ env.EAP_FILE_W_SHA }}
@@ -124,7 +124,7 @@ jobs:
   # Sign the eap-file from the build
   sign-eap:
     runs-on: ubuntu-latest
-    if: ${{ (github.ref_type == 'tag') || (github.event_name == 'push' && github.ref == 'refs/heads/main') }}
+    #if: ${{ (github.ref_type == 'tag') || (github.event_name == 'push' && github.ref == 'refs/heads/main') }}
     needs: build
     permissions:
       contents: write
@@ -172,7 +172,7 @@ jobs:
             -H 'Authorization: Bearer ${{secrets.ACAP_PORTAL_SIGNING_BEARER_TOKEN}}' \
             '${{ vars.ACAP_PORTAL_URL }}/${{secrets.ACAP_PORTAL_SIGNING_ID}}/sign/binary' \
             -F uploadedFile=@"${{ env.EAP_FILE }}" --output ${{ env.SIGNED_EAP_FILE }} \
-            -w "%{http_code}\n" -o /dev/null)
+            -w "%{http_code}\n" -o /dev/null --http1.1)
           echo "HTTP_RESPONSE=$RESPONSE" >> $GITHUB_ENV
       - name: Check that acap has been signed
         run: |
