@@ -100,7 +100,7 @@ Enable TLS:
 
 ```sh
 curl -s --anyauth -u "root:$DEVICE_PASSWORD" \
-  "http://$DEVICE_IP/axis-cgi/param.cgi?action=update&root.dockerdwrapper.UseTLS=yes"
+  "http://$DEVICE_IP/axis-cgi/param.cgi?action=update&root.dockerdwrapperwithcompose.UseTLS=yes"
 ```
 
 Enable TCP Socket:
@@ -129,25 +129,25 @@ The files can be uploaded to the device using HTTP.
 
 ```sh
 curl --anyauth -u "root:$DEVICE_PASSWORD" -F file=@ca.pem -X POST \
-  http://$DEVICE_IP/local/dockerdwrapper/ca.pem
+  http://$DEVICE_IP/local/dockerdwrapperwithcompose/ca.pem
 curl --anyauth -u "root:$DEVICE_PASSWORD" -F file=@server-cert.pem -X POST \
-  http://$DEVICE_IP/local/dockerdwrapper/server-cert.pem
+  http://$DEVICE_IP/local/dockerdwrapperwithcompose/server-cert.pem
 curl --anyauth -u "root:$DEVICE_PASSWORD" -F file=@server-key.pem -X POST \
-  http://$DEVICE_IP/local/dockerdwrapper/server-key.pem
+  http://$DEVICE_IP/local/dockerdwrapperwithcompose/server-key.pem
 ```
 
 If desired, they can be deleted from the device using:
 
 ```sh
 curl --anyauth -u "root:$DEVICE_PASSWORD" -X DELETE \
-  http://$DEVICE_IP/local/dockerdwrapper/ca.pem
+  http://$DEVICE_IP/local/dockerdwrapperwithcompose/ca.pem
 curl --anyauth -u "root:$DEVICE_PASSWORD" -X DELETE \
-  http://$DEVICE_IP/local/dockerdwrapper/server-cert.pem
+  http://$DEVICE_IP/local/dockerdwrapperwithcompose/server-cert.pem
 curl --anyauth -u "root:$DEVICE_PASSWORD" -X DELETE \
-  http://$DEVICE_IP/local/dockerdwrapper/server-key.pem
+  http://$DEVICE_IP/local/dockerdwrapperwithcompose/server-key.pem
 ```
 
-They can also be copied to the `/usr/local/packages/dockerdwrapper/localdata`
+They can also be copied to the `/usr/local/packages/dockerdwrapperwithcompose/localdata`
 directory of the device using `scp`.
 
 ```sh
