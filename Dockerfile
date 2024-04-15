@@ -1,22 +1,21 @@
 # syntax=docker/dockerfile:1
 
-ARG DOCKER_VERSION=26.0.0
+ARG DOCKER_IMAGE_VERSION=26.0.0
 ARG DOCKER_COMPOSE_VERSION=v2.25.0
+ARG PROCPS_VERSION=v3.3.17
 
 ARG REPO=axisecp
-ARG ACAPARCH=armv7hf
+ARG ARCH=armv7hf
 
 ARG VERSION=1.13
 ARG UBUNTU_VERSION=22.04
 ARG NATIVE_SDK=acap-native-sdk
 
-FROM ${REPO}/${NATIVE_SDK}:${VERSION}-${ACAPARCH}-ubuntu${UBUNTU_VERSION} as build_image
+FROM ${REPO}/${NATIVE_SDK}:${VERSION}-${ARCH}-ubuntu${UBUNTU_VERSION} AS sdk_image
 
-FROM build_image AS ps
-ARG PROCPS_VERSION=v3.3.17
-ARG BUILD_DIR=/build
-ARG EXPORT_DIR=/export
+FROM sdk_image AS build_image
 
+# hadolint ignore=DL3009
 RUN <<EOF
     apt-get update
     apt-get -q install -y -f --no-install-recommends \
@@ -24,17 +23,25 @@ RUN <<EOF
         autopoint \
         gettext \
         git \
-        libtool 
+        libtool
     ln -s /usr/bin/libtoolize /usr/bin/libtool
-
 EOF
+
+FROM build_image AS ps
+
+ARG PROCPS_VERSION
+ARG BUILD_DIR=/build
+ARG EXPORT_DIR=/export
 
 WORKDIR $BUILD_DIR
 RUN git clone --depth 1 -b $PROCPS_VERSION 'https://gitlab.com/procps-ng/procps' .
 
 ARG BUILD_CACHE=build.cache
-RUN echo ac_cv_func_realloc_0_nonnull=yes >$BUILD_CACHE \
-    && echo ac_cv_func_malloc_0_nonnull=yes >>$BUILD_CACHE
+RUN <<EOF
+    echo ac_cv_func_realloc_0_nonnull=yes >$BUILD_CACHE
+    echo ac_cv_func_malloc_0_nonnull=yes >>$BUILD_CACHE
+EOF
+
 RUN <<EOF
     . /opt/axis/acapsdk/environment-setup*
     ./autogen.sh
@@ -49,25 +56,26 @@ EOF
 WORKDIR $EXPORT_DIR
 RUN cp $BUILD_DIR/ps/pscommand ps
 
-FROM build_image as build
+FROM sdk_image AS docker-binaries
 
-ARG DOCKER_VERSION
+WORKDIR /download
+
+ARG ARCH
+ARG DOCKER_IMAGE_VERSION
 ARG DOCKER_COMPOSE_VERSION
-ARG ACAPARCH
 
-COPY app /opt/app
-COPY --from=ps /export/ps /opt/app
+RUN echo ${DOCKER_COMPOSE_VERSION}
 
-# Get docker* binaries and scripts
+# Download and extract dockerd and its dependencies
 RUN <<EOF
-    if [ "$ACAPARCH" = "armv7hf" ]; then
+    if [ "$ARCH" = "armv7hf" ]; then
         export DOCKER_ARCH="armhf";
         export DOCKER_COMPOSE_ARCH="armv7";
-    elif [ "$ACAPARCH" = "aarch64" ]; then
+    elif [ "$ARCH" = "aarch64" ]; then
         export DOCKER_ARCH="aarch64";
         export DOCKER_COMPOSE_ARCH="aarch64";
     fi;
-    curl -Lo docker_binaries.tgz "https://download.docker.com/linux/static/stable/${DOCKER_ARCH}/docker-${DOCKER_VERSION}.tgz" ;
+    curl -Lo docker_binaries.tgz "https://download.docker.com/linux/static/stable/${DOCKER_ARCH}/docker-${DOCKER_IMAGE_VERSION}.tgz" ;
     tar -xz -f docker_binaries.tgz --strip-components=1 docker/docker ;
     tar -xz -f docker_binaries.tgz --strip-components=1 docker/dockerd ;
     tar -xz -f docker_binaries.tgz --strip-components=1 docker/docker-init ;
@@ -76,7 +84,19 @@ RUN <<EOF
     chmod +x docker-compose
 EOF
 
+FROM sdk_image AS build
+
 WORKDIR /opt/app
+
+COPY app .
+COPY --from=ps /export/ps .
+COPY --from=docker-binaries \
+    /download/dockerd \
+    /download/docker-init \
+    /download/docker-proxy \
+    /download/docker \
+    /download/docker-compose ./
+
 RUN <<EOF
     . /opt/axis/acapsdk/environment-setup*
     acap-build . \

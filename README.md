@@ -305,8 +305,8 @@ Following are the possible values of `Status`:
 To build the Docker Compose ACAP use docker buildx with the provided Dockerfile:
 
 ```sh
-# Build Docker ACAP image
-docker buildx build --file Dockerfile --tag docker-acap-with-compose:<ARCH> --build-arg ACAPARCH=<ARCH> --output <build-folder> .
+# Build Docker Compose ACAP image
+docker buildx build --file Dockerfile --tag docker-acap-with-compose:<ARCH> --build-arg ARCH=<ARCH> --output <build-folder> .
 ```
 
 where `<ARCH>` is either `armv7hf` or `aarch64`. `<build-folder>` is the path to an output folder
