@@ -148,7 +148,7 @@ curl --anyauth -u "root:$DEVICE_PASSWORD" -X DELETE \
   http://$DEVICE_IP/local/dockerdwrapperwithcompose/server-key.pem
 ```
 
-They can also be copied to the `/usr/local/packages/dockerdwrapper/localdata`
+They can also be copied to the `/usr/local/packages/dockerdwrapperwithcompose/localdata`
 directory of the device using `scp`,
 but this method will not cause the dockerd service to restart.
 
