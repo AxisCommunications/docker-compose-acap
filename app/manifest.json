@@ -20,7 +20,7 @@
         },
         "installation": {
             "postInstallScript": "postinstallscript.sh"
-        }
+        },
         "configuration": {
             "paramConfig": [
                 {
