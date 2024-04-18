@@ -20,10 +20,7 @@
         },
         "installation": {
             "postInstallScript": "postinstallscript.sh"
-        },
-        "uninstallation": {
-            "preUninstallScript": "preuninstallscript.sh"
-        },
+        }
         "configuration": {
             "paramConfig": [
                 {
@@ -63,7 +60,8 @@
                 }
             ],
             "containers": {
-                "containerHost": true
+                "containerHost": true,
+                "createDockerSymlinks": true
             },
             "settingPage": "index.html",
             "httpConfig": [
