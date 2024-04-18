@@ -1,8 +1,8 @@
 <!-- omit in toc -->
-# The Docker ACAP application
+# The Docker Compose ACAP application
 
-The Docker ACAP application, from here on called the application, provides the means to run Docker on
-a compatible Axis device.
+The Docker Compose ACAP application, from here on called the application, provides the means to run
+Docker on a compatible Axis device.
 
 <!-- omit in toc -->
 ## Notable Releases
@@ -95,7 +95,7 @@ The following substitutions will be used in this documentation:
 
 |                      | Meaning                                                |
 | ---------------------| :------------------------------------------------------|
-| `<application-name>` | `dockerdwrapper`                                       |
+| `<application-name>` | `dockerdwrapperwithcompose`                            |
 | `<ARCH>`             | Device architecture, either `armv7hf`or `aarch64`      |
 | `<device-ip>`        | The IP address of the device                           |
 | `<user>`             | The name of a user on the device with admin rights     |
@@ -109,7 +109,7 @@ Download the EAP file for the architecture of your device from [Releases][latest
 From the command line this can be done with:
 
 ```sh
-curl -s https://api.github.com/repos/AxisCommunications/docker-acap/releases/latest \
+curl -s https://api.github.com/repos/AxisCommunications/docker-compose-acap/releases/latest \
  | grep "browser_download_url.*Docker_Daemon_.*_<ARCH>\_signed.eap"
 ```
 
@@ -389,7 +389,7 @@ docker save <image-in-client-local-repository> | docker --tlsverify --host tcp:/
 
 The application is run by a non-root user on the device. This user is set
 up to be a member in a number of secondary groups as listed in the
-[manifest.json](https://github.com/AxisCommunications/docker-acap/blob/main/app/manifest.json#L6-L11)
+[manifest.json](https://github.com/AxisCommunications/docker-compose-acap/blob/main/app/manifest.json#L6-L11)
 file.
 
 When running a container, a user called `root`, (uid 0), belonging to group `root`, (gid 0),
@@ -429,8 +429,8 @@ Take a look at the [CONTRIBUTING.md](CONTRIBUTING.md) file.
 
 <!-- Links to external references -->
 <!-- markdownlint-disable MD034 -->
-[1.5.0-release]: https://github.com/AxisCommunications/docker-acap/releases/tag/1.5.0
-[2.0.0-release]: https://github.com/AxisCommunications/docker-acap/releases/tag/2.0.0
+[1.5.0-release]: https://github.com/AxisCommunications/docker-compose-acap/releases/tag/1.5.0
+[2.0.0-release]: https://github.com/AxisCommunications/docker-compose-acap/releases/tag/2.0.0
 [buildx]: https://docs.docker.com/build/install-buildx/
 [devices]: https://axiscommunications.github.io/acap-documentation/docs/axis-devices-and-compatibility#sdk-and-device-compatibility
 [dockerDesktop]: https://docs.docker.com/desktop/
@@ -438,7 +438,7 @@ Take a look at the [CONTRIBUTING.md](CONTRIBUTING.md) file.
 [dockerEngine]: https://docs.docker.com/engine/
 [docker-hello-world]: https://hub.docker.com/_/hello-world
 [docker-rootless-mode]: https://docs.docker.com/engine/security/rootless/
-[latest-release]: https://github.com/AxisCommunications/docker-acap/releases/latest
+[latest-release]: https://github.com/AxisCommunications/docker-compose-acap/releases/latest
 [object-detector-python]: https://github.com/AxisCommunications/acap-computer-vision-sdk-examples/tree/main/object-detector-python
 [product-selector]: https://www.axis.com/support/tools/product-selector
 [product-selector-container]: https://www.axis.com/support/tools/product-selector/shared/%5B%7B%22index%22%3A%5B4%2C2%5D%2C%22value%22%3A%22Yes%22%7D%5D
