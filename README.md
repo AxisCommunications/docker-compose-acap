@@ -1,8 +1,8 @@
 <!-- omit in toc -->
 # The Docker Compose ACAP application
 
-The Docker Compose ACAP application, from here on called the application, provides the means to run
-Docker on a compatible Axis device.
+The Docker Compose ACAP application, from here on called the application, provides the means to run rootless
+Docker on a compatible Axis device. In addition it bundles the docker CLI and the docker Compose CLI.
 
 <!-- omit in toc -->
 ## Notable Releases
@@ -94,7 +94,7 @@ page by checking the [Container support check box][product-selector-container].
 The following substitutions will be used in this documentation:
 
 |                      | Meaning                                                |
-| ---------------------| :------------------------------------------------------|
+| -------------------- | :----------------------------------------------------- |
 | `<application-name>` | `dockerdwrapperwithcompose`                            |
 | `<ARCH>`             | Device architecture, either `armv7hf`or `aarch64`      |
 | `<device-ip>`        | The IP address of the device                           |
@@ -110,7 +110,7 @@ From the command line this can be done with:
 
 ```sh
 curl -s https://api.github.com/repos/AxisCommunications/docker-compose-acap/releases/latest \
- | grep "browser_download_url.*Docker_Daemon_.*_<ARCH>\_signed.eap"
+ | "browser_download_url.*Docker_Daemon_with_Compose_.*_<ARCH>\_signed.eap"
 ```
 
 The prebuilt application is signed. Read more about signing
@@ -175,8 +175,8 @@ an SD card. See [Using an SD card as storage](#using-an-sd-card-as-storage) for 
 #### TCP Socket / IPC Socket
 
 To be able to connect remotely to the docker daemon on the device, `TCP Socket` needs to be selected.
-`IPC Socket` needs to be selected for containers running on the device to be able to communicate with each other.
-At least one of the sockets needs to be selected for the application to start dockerd.
+`IPC Socket` needs to be selected for containers running on the device to be able to communicate with
+each other. At least one of the sockets needs to be selected for the application to start dockerd.
 
 #### Use TLS
 
@@ -327,9 +327,18 @@ To get more informed about specifications, check the
 
 ### Using the application
 
-The application does not contain the docker client binary. This means that all
-calls need to be done from a separate machine. This can be achieved by using
-the `--host` flag when running the docker command and requires `TCP Socket` to be selected.
+#### Using the application on an Axis device
+
+The application bundles the docker and docker compose clis so these can be used directly on
+the device to interact with the Docker daemon. The `IPC Socket` need to be selected and the user
+should either be the application user or be a member of the `addon` group.
+The [Container example][acap-native-container-example] how a second ACAP application
+can utilize the clis in this way.
+
+#### Using the application remotely
+
+To interact with the Docker daemon from a remote machine the `TCP Socket` need to be
+selected and the `--host` option need to be used when running any docker command.
 
 The port used will change depending on if the application runs using TLS or not.
 The Docker daemon will be reachable on port 2375 when running unsecured, and on
@@ -431,6 +440,7 @@ Take a look at the [CONTRIBUTING.md](CONTRIBUTING.md) file.
 <!-- markdownlint-disable MD034 -->
 [1.5.0-release]: https://github.com/AxisCommunications/docker-compose-acap/releases/tag/1.5.0
 [2.0.0-release]: https://github.com/AxisCommunications/docker-compose-acap/releases/tag/2.0.0
+[acap-native-container-example]: https://github.com/AxisCommunications/acap-native-sdk-examples/tree/main/container-example
 [buildx]: https://docs.docker.com/build/install-buildx/
 [devices]: https://axiscommunications.github.io/acap-documentation/docs/axis-devices-and-compatibility#sdk-and-device-compatibility
 [dockerDesktop]: https://docs.docker.com/desktop/
