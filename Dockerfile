@@ -105,7 +105,6 @@ RUN <<EOF
         -a docker-compose \
         -a docker-init \
         -a docker-proxy \
-        -a empty_daemon.json \
         -a ps
 EOF
 
