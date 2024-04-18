@@ -1,8 +1,8 @@
 <!-- omit in toc -->
 # The Docker Compose ACAP application
 
-The Docker Compose ACAP application, from here on called the application, provides the means to run
-Docker on a compatible Axis device.
+The Docker Compose ACAP application, from here on called the application, provides the means to run rootless
+Docker on a compatible Axis device. In addition it bundles the Docker CLI and the Docker Compose CLI.
 
 <!-- omit in toc -->
 ## Notable Releases
@@ -111,7 +111,7 @@ From the command line this can be done with:
 
 ```sh
 curl -s https://api.github.com/repos/AxisCommunications/docker-compose-acap/releases/latest \
- | grep "browser_download_url.*Docker_Daemon_.*_<ARCH>\_signed.eap"
+ | "browser_download_url.*Docker_Daemon_with_Compose_.*_<ARCH>\_signed.eap"
 ```
 
 The prebuilt application is signed. Read more about signing
@@ -336,6 +336,14 @@ To get more informed about specifications, check the
 
 ### Using the application
 
+#### Using the application on an Axis device
+
+The application bundles the docker and docker compose clis so these can be used directly on
+the device to interact with the Docker daemon. The `IPCSocket` need to be selected and the user
+should either be the application user or be a member of the `addon` group.
+The [Container example][acap-native-container-example] how a second ACAP application
+can utilize the clis in this way.
+
 #### Using the application remotely
 
 To interact with the Docker daemon from a remote machine the `TCPSocket` need to be
@@ -440,6 +448,7 @@ Take a look at the [CONTRIBUTING.md](CONTRIBUTING.md) file.
 <!-- markdownlint-disable MD034 -->
 [1.5.0-release]: https://github.com/AxisCommunications/docker-compose-acap/releases/tag/1.5.0
 [2.0.0-release]: https://github.com/AxisCommunications/docker-compose-acap/releases/tag/2.0.0
+[acap-native-container-example]: https://github.com/AxisCommunications/acap-native-sdk-examples/tree/main/container-example
 [buildx]: https://docs.docker.com/build/install-buildx/
 [devices]: https://axiscommunications.github.io/acap-documentation/docs/axis-devices-and-compatibility#sdk-and-device-compatibility
 [dockerDesktop]: https://docs.docker.com/desktop/
