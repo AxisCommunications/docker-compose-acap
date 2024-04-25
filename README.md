@@ -67,7 +67,6 @@ user is a member of. This means that resources on the device, even if they are v
 can be inaccessible inside the container. This can also affect usage of unsupported D-Bus methods from
 the container. See [Using host user secondary groups in container](#using-host-user-secondary-groups-in-container)
 for how to handle this.
-- iptables use is disabled.
 
 ## Requirements
 
