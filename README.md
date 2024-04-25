@@ -446,9 +446,9 @@ Take a look at the [CONTRIBUTING.md](CONTRIBUTING.md) file.
 
 <!-- Links to external references -->
 <!-- markdownlint-disable MD034 -->
-[1.5.0-release]: https://github.com/AxisCommunications/docker-acap/releases/tag/1.5.0
-[2.0.0-release]: https://github.com/AxisCommunications/docker-acap/releases/tag/2.0.0
-[3.0.0-rc.3]: https://github.com/AxisCommunications/docker-acap/releases/tag/3.0.0-rc.3
+[1.5.0-release]: https://github.com/AxisCommunications/docker-compose-acap/releases/tag/1.5.0
+[2.0.0-release]: https://github.com/AxisCommunications/docker-compose-acap/releases/tag/2.0.0
+[3.0.0-rc.3]: https://github.com/AxisCommunications/docker-compose-acap/releases/tag/3.0.0-rc.3
 [buildx]: https://docs.docker.com/build/install-buildx/
 [devices]: https://axiscommunications.github.io/acap-documentation/docs/axis-devices-and-compatibility#sdk-and-device-compatibility
 [dockerDesktop]: https://docs.docker.com/desktop/
