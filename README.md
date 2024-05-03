@@ -9,7 +9,7 @@ Docker on a compatible Axis device. In addition it bundles the Docker CLI and th
 <!-- markdownlint-disable MD013 -->
 | Release                  | AXIS OS min. version | Dockerd version | Type     | Comment                         |
 | -----------------------: | -------------------: | --------------: |----------|---------------------------------|
-| [3.0.0-rc.3][3.0.0-rc.3] | 11.10                | 26.0.0          | rootless | Release candidate               |
+| [3.0.0][latest-release]  | 11.10                | 26.0.0          | rootless | Latest release                  |
 | [2.0.0][2.0.0-release]   | 11.9                 | 26.0.0          | rootful  | Legacy release AXIS OS 2024 LTS |
 | [1.5.0][1.5.0-release]   | 10.12                | 20.10.9         | rootful  | Legacy release AXIS OS 2022 LTS |
 
@@ -345,9 +345,11 @@ To get more informed about specifications, check the
 
 #### Using the application on an Axis device
 
-The application bundles the docker and docker compose clis so these can be used directly on
-the device to interact with the Docker daemon. The `IPCSocket` need to be selected and the user
-should either be the application user or be a member of the `addon` group.
+The application bundles the docker and docker compose clis so that these can be used directly on
+the device to interact with the Docker daemon. For this, the `IPCSocket` need to be selected.
+The user of the clis should either be the application user itself or be a member of the `addon` group.
+If a second ACAP application is used to interact with the clis, this means that that application
+should be setup with a dynamic user.
 The [Container example][acap-native-container-example] how a second ACAP application
 can utilize the clis in this way.
 
@@ -454,9 +456,8 @@ Take a look at the [CONTRIBUTING.md](CONTRIBUTING.md) file.
 
 <!-- Links to external references -->
 <!-- markdownlint-disable MD034 -->
-[1.5.0-release]: https://github.com/AxisCommunications/docker-compose-acap/releases/tag/1.5.0
-[2.0.0-release]: https://github.com/AxisCommunications/docker-compose-acap/releases/tag/2.0.0
-[3.0.0-rc.3]: https://github.com/AxisCommunications/docker-compose-acap/releases/tag/3.0.0-rc.3
+[1.5.0-release]: https://github.com/AxisCommunications/docker-acap/releases/tag/1.5.0
+[2.0.0-release]: https://github.com/AxisCommunications/docker-acap/releases/tag/2.0.0
 [acap-native-container-example]: https://github.com/AxisCommunications/acap-native-sdk-examples/tree/main/container-example
 [buildx]: https://docs.docker.com/build/install-buildx/
 [devices]: https://axiscommunications.github.io/acap-documentation/docs/axis-devices-and-compatibility#sdk-and-device-compatibility
