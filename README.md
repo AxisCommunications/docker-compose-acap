@@ -364,6 +364,25 @@ port 2376 when running secured using TLS. Please read section
 [Using TLS to secure the application](#using-tls-to-secure-the-application) for
 more information.
 
+#### Proxy Setup
+
+If the device is located behind a corporate proxy you may need to set the correct environment variables. This is done by configuring proxy behavior for dockerd in the daemon.json file as described in ['Configure the Docker daemon to use a proxy server'][docker-proxy].
+
+The daemon.json file should be located at `/usr/local/packages/dockerdwrapper/localdata/daemon.json` on the device and should include the following properties.
+
+```json
+{
+  "proxies": {
+    "http-proxy": "http://proxy.example.com:3128",
+    "https-proxy": "https://proxy.example.com:3129",
+    "no-proxy": "*.test.example.com,.example.org,127.0.0.0/8"
+  }
+}
+```
+Setting the contents of the daemon.json file can be done either by adding it to the source code and rebuilding the application or by ssh:ing into the device with an already installed application.
+In the latter case [developer mode][developermode] is needed, see that documentation for further details.
+Also note that, if the application is running when the file is updated, it needs to be restarted for the change to take effect.
+
 #### Run a container
 
 Make sure the application, using TLS, is running, then pull and run the
@@ -373,7 +392,7 @@ Make sure the application, using TLS, is running, then pull and run the
 $ docker --tlsverify --host tcp://<device-ip>:2376 pull hello-world
 Using default tag: latest
 latest: Pulling from library/hello-world
-70f5ac315c5a: Pull complete 
+70f5ac315c5a: Pull complete
 Digest: sha256:88ec0acaa3ec199d3b7eaf73588f4518c25f9d34f58ce9a0df68429c5af48e8d
 Status: Downloaded newer image for hello-world:latest
 docker.io/library/hello-world:latest
@@ -472,8 +491,10 @@ Take a look at the [CONTRIBUTING.md](CONTRIBUTING.md) file.
 [acap-native-container-example]: https://github.com/AxisCommunications/acap-native-sdk-examples/tree/main/container-example
 [buildx]: https://docs.docker.com/build/install-buildx/
 [devices]: https://axiscommunications.github.io/acap-documentation/docs/axis-devices-and-compatibility#sdk-and-device-compatibility
+[developermode]: http://axiscommunications.github.io/acap-documentation/docs/get-started/set-up-developer-environment/set-up-device-advanced
 [dockerDesktop]: https://docs.docker.com/desktop/
 [docker_protect-access]: https://docs.docker.com/engine/security/protect-access/
+[docker-proxy]: https://docs.docker.com/config/daemon/systemd/#httphttps-proxy
 [dockerEngine]: https://docs.docker.com/engine/
 [docker-hello-world]: https://hub.docker.com/_/hello-world
 [docker-rootless-mode]: https://docs.docker.com/engine/security/rootless/
