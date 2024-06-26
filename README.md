@@ -39,6 +39,7 @@ Docker on a compatible Axis device. In addition it bundles the Docker CLI and th
   - [Using an SD card as storage](#using-an-sd-card-as-storage)
   - [Using the application](#using-the-application)
 - [Building the application](#building-the-application)
+  - [Build options](#build-options)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -132,7 +133,7 @@ The prebuilt application is signed. Read more about signing
 >- Stop the application.
 >- Uninstall the application.
 >- Format the SD card if you will use it with the application. Make sure to manually
->  back up any data you wish to keep first.
+> back up any data you wish to keep first.
 >- Restart the device.
 >- Install the rootless application.
 
