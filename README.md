@@ -409,7 +409,7 @@ If the device is located behind a proxy the Docker daemon needs to be configured
 This is done by configuring proxy behavior for dockerd in the daemon.json file as described in
 ['Configure the Docker daemon to use a proxy server'][docker-proxy].
 
-The daemon.json file should be located at `/usr/local/packages/dockerdwrapper/localdata/daemon.json`
+The daemon.json file should be located at `/usr/local/packages/dockerdwrapperwithcompose/localdata/daemon.json`
 on the device and should include the following properties:
 
 ```json
