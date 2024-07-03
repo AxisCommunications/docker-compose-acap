@@ -475,8 +475,8 @@ in the `<build-folder>`.
 
 ### Build options
 
-In order to build with debug symbols and sanitizing instrumentation for detecting memory leaks and
-undefined behavior, add the option
+In order to build with debug symbols and sanitizing instrumentation for detecting memory leaks and undefined behavior,
+add the option
 
 ```sh
 --build-arg BUILD_WITH_SANITIZERS=1
