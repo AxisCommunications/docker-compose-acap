@@ -495,8 +495,8 @@ Take a look at the [CONTRIBUTING.md](CONTRIBUTING.md) file.
 
 <!-- Links to external references -->
 <!-- markdownlint-disable MD034 -->
-[1.5.0-release]: https://github.com/AxisCommunications/docker-acap/releases/tag/1.5.0
-[2.0.0-release]: https://github.com/AxisCommunications/docker-acap/releases/tag/2.0.0
+[1.5.0-release]: https://github.com/AxisCommunications/docker-compose-acap/releases/tag/1.5.0
+[2.0.0-release]: https://github.com/AxisCommunications/docker-compose-acap/releases/tag/2.0.0
 [acap-native-container-example]: https://github.com/AxisCommunications/acap-native-sdk-examples/tree/main/container-example
 [buildx]: https://docs.docker.com/build/install-buildx/
 [devices]: https://axiscommunications.github.io/acap-documentation/docs/axis-devices-and-compatibility#sdk-and-device-compatibility
@@ -507,7 +507,7 @@ Take a look at the [CONTRIBUTING.md](CONTRIBUTING.md) file.
 [docker-hello-world]: https://hub.docker.com/_/hello-world
 [docker-rootless-mode]: https://docs.docker.com/engine/security/rootless/
 [docker-proxy]: https://docs.docker.com/config/daemon/systemd/#httphttps-proxy
-[latest-release]: https://github.com/AxisCommunications/docker-acap/releases/latest
+[latest-release]: https://github.com/AxisCommunications/docker-compose-acap/releases/latest
 [object-detector-python]: https://github.com/AxisCommunications/acap-computer-vision-sdk-examples/tree/main/object-detector-python
 [product-selector]: https://www.axis.com/support/tools/product-selector
 [product-selector-container]: https://www.axis.com/support/tools/product-selector/shared/%5B%7B%22index%22%3A%5B4%2C2%5D%2C%22value%22%3A%22Yes%22%7D%5D
