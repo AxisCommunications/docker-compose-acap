@@ -125,8 +125,8 @@ curl -s https://api.github.com/repos/AxisCommunications/docker-compose-acap/rele
  | "browser_download_url.*Docker_Daemon_with_Compose_.*_<ARCH>\_signed.eap"
 ```
 
-The prebuilt application is signed. Read more about signing
-[here][signing-documentation].
+The prebuilt application is signed. Read more about signing in the
+[Signing Documentation][signing-documentation].
 
 ### Installation
 
@@ -432,8 +432,8 @@ on the device and should include the following properties:
 ```
 
 Setting the contents of the daemon.json file can be done either by adding it to the source code and
-rebuilding the application or by logging into the device over SSH with an already installed application and updating
-the file.
+rebuilding the application or by logging into the device over SSH with an already installed
+application and updating the file.
 In the latter case [Developer Mode][developermode] is needed, see that documentation for further details.
 Also note that, if the application is running when the file is updated, it needs to be restarted for
 the change to take effect.
