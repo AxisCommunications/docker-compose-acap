@@ -176,6 +176,7 @@ jobs:
           RESPONSE=$(curl -XPOST -H 'accept: */*' -H 'Content-Type: multipart/form-data' \
             -H 'Authorization: Bearer ${{secrets.ACAP_PORTAL_SIGNING_BEARER_TOKEN}}' \
             '${{ vars.ACAP_PORTAL_URL }}/${{secrets.ACAP_PORTAL_SIGNING_ID}}/sign/binary' \
+            --limit-rate 900K \
             --upload-file "${{ env.EAP_FILE }}" --output ${{ env.SIGNED_EAP_FILE }} \
             -w "%{http_code}\n" -o /dev/null --http1.1)
           echo "HTTP_RESPONSE=$RESPONSE" >> $GITHUB_ENV
