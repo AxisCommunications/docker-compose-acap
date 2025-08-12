@@ -173,6 +173,7 @@ jobs:
       - name: Sign eap-file
         run: |
           cd build
+          ls -la
           RESPONSE=$(curl -XPOST -H 'accept: */*' -H 'Content-Type: multipart/form-data' \
             -H 'Authorization: Bearer ${{secrets.ACAP_PORTAL_SIGNING_BEARER_TOKEN}}' \
             '${{ vars.ACAP_PORTAL_URL }}/${{secrets.ACAP_PORTAL_SIGNING_ID}}/sign/binary' \
