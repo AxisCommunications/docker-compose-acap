@@ -124,7 +124,7 @@ jobs:
   # Sign the eap-file from the build
   sign-eap:
     runs-on: ubuntu-latest
-    if: ${{ (github.ref_type == 'tag') || (github.event_name == 'push' && github.ref == 'refs/heads/main') }}
+    #if: ${{ (github.ref_type == 'tag') || (github.event_name == 'push' && github.ref == 'refs/heads/main') }}
     needs: build
     permissions:
       contents: write
@@ -161,6 +161,11 @@ jobs:
         run: |
           mkdir -p build
           mv ${{ github.workspace }}/build-${{ matrix.arch }}/${{ env.EAP_FILE }} build/.
+      - name: Upload unsigned artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.EAP_FILE }}
+          path: ${{ env.EAP_FILE }}
       - name: Refactor naming of EAP-file for signed output
         run: |
           signed_output=$(echo "${{ env.EAP_FILE }}" | sed 's/\.eap/_signed.eap/')
