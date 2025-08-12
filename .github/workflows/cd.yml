@@ -165,7 +165,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.EAP_FILE }}
-          path: ${{ env.EAP_FILE }}
+          path: build/${{ env.EAP_FILE }}
       - name: Refactor naming of EAP-file for signed output
         run: |
           signed_output=$(echo "${{ env.EAP_FILE }}" | sed 's/\.eap/_signed.eap/')
