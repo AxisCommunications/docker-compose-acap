@@ -157,7 +157,6 @@ RUN <<EOF
     acap-build . \
         -a docker \
         -a dockerd \
-        -a docker-compose \
         -a docker-init \
         -a docker-proxy \
         -a ps \
