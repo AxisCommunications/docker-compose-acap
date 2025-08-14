@@ -155,7 +155,6 @@ RUN <<EOF
     . /opt/axis/acapsdk/environment-setup*
     BUILD_WITH_SANITIZERS="$BUILD_WITH_SANITIZERS" \
     acap-build . \
-        -a docker \
         -a dockerd \
         -a docker-init \
         -a docker-proxy \
