@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-ARG DOCKER_IMAGE_VERSION=26.0.0
+ARG DOCKER_IMAGE_VERSION=29.8.1
 ARG DOCKER_COMPOSE_VERSION=v2.25.0
 ARG PROCPS_VERSION=v3.3.17
 ARG NSENTER_VERSION=v2.40
@@ -146,7 +146,6 @@ COPY --from=docker_binaries \
     /download/docker \
     /download/docker-compose \
     /download/rootlesskit \
-    /download/rootlesskit-docker-proxy \
     /download/slirp4netns ./
 
 ARG BUILD_WITH_SANITIZERS
@@ -163,7 +162,6 @@ RUN <<EOF
         -a ps \
         -a slirp4netns \
         -a rootlesskit \
-        -a rootlesskit-docker-proxy \
         -a nsenter
 EOF
 
