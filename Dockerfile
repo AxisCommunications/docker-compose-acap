@@ -2,7 +2,7 @@
 
 ARG DOCKER_IMAGE_VERSION=29.8.1
 ARG DOCKER_COMPOSE_VERSION=v2.25.0
-ARG PROCPS_VERSION=v3.3.17
+ARG PROCPS_VERSION=v4.0.7
 ARG NSENTER_VERSION=v2.40
 ARG SLIRP4NETNS_VERSION=1.3.5
 
@@ -53,12 +53,12 @@ RUN <<EOF
                 --disable-shared \
                 --without-ncurses  \
                 --cache-file="$BUILD_CACHE"
-    make ps/pscommand
-    $STRIP ps/pscommand
+    make src/ps/pscommand
+    $STRIP src/ps/pscommand
 EOF
 
 WORKDIR $EXPORT_DIR
-RUN cp $BUILD_DIR/ps/pscommand ps
+RUN cp $BUILD_DIR/src/ps/pscommand ps
 
 FROM build_image AS nsenter
 
