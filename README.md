@@ -82,6 +82,9 @@ TLS does not protect container services or restore the omitted filtering.
 Restrict network access, publish only necessary ports, and protect sensitive container services with
 their own authentication and encryption.
 
+- The application does not bundle buildx so features that require buildx to run are not supported on
+the device.
+
 ## Requirements
 
 The following requirements need to be met for running the application built from the
